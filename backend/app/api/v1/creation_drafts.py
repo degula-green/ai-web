@@ -1,0 +1,122 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, Body, Depends, Query
+from fastapi.responses import FileResponse
+
+from app.api.deps import (
+    get_clip_render_service,
+    get_creation_draft_service,
+    get_current_auth_context,
+)
+from app.core.exceptions import ContractError
+from app.core.response import ResponseEnvelope, success_response
+from app.schemas.clip_render import ClipRenderRequest, ClipRenderResponse
+from app.schemas.creation_draft import (
+    CreationDraftCreateRequest,
+    CreationDraftListResponse,
+    CreationDraftRead,
+    CreationDraftUpdateRequest,
+    DigitalHumanAssetUpdateRequest,
+)
+from app.services.auth_service import AuthContext
+from app.services.clip_render_service import ClipRenderService
+from app.services.creation_draft_service import CreationDraftService
+
+router = APIRouter()
+
+
+@router.post("", response_model=ResponseEnvelope[CreationDraftRead])
+def create_creation_draft(
+    payload: CreationDraftCreateRequest,
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[CreationDraftRead]:
+    data = service.create(user_id=context.user.id, payload=payload)
+    return success_response(data, message="creation draft created")
+
+
+@router.get("", response_model=ResponseEnvelope[CreationDraftListResponse])
+def list_creation_drafts(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[CreationDraftListResponse]:
+    items = service.list_by_user(user_id=context.user.id, limit=limit, offset=offset)
+    return success_response(CreationDraftListResponse(items=items))
+
+
+@router.get("/{draft_id}", response_model=ResponseEnvelope[CreationDraftRead])
+def get_creation_draft(
+    draft_id: str,
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[CreationDraftRead]:
+    data = service.get(user_id=context.user.id, draft_id=draft_id)
+    return success_response(data)
+
+
+@router.post("/{draft_id}/clip-render", response_model=ResponseEnvelope[ClipRenderResponse])
+def clip_render_creation_draft(
+    draft_id: str,
+    payload: ClipRenderRequest = Body(default_factory=ClipRenderRequest),
+    context: AuthContext = Depends(get_current_auth_context),
+    clip_service: ClipRenderService = Depends(get_clip_render_service),
+) -> ResponseEnvelope[ClipRenderResponse]:
+    data = clip_service.render_for_user(
+        user_id=context.user.id,
+        draft_id=draft_id,
+        subtitle_segments=payload.segments,
+        render_config=payload.render_config,
+    )
+    return success_response(data, message="剪辑成片已生成")
+
+
+@router.get("/{draft_id}/clipped-video")
+def stream_clipped_video(
+    draft_id: str,
+    context: AuthContext = Depends(get_current_auth_context),
+    draft_service: CreationDraftService = Depends(get_creation_draft_service),
+    clip_service: ClipRenderService = Depends(get_clip_render_service),
+) -> FileResponse:
+    draft_service.get(user_id=context.user.id, draft_id=draft_id)
+    path = clip_service.local_clipped_path(draft_id)
+    if path is None:
+        raise ContractError("本地剪辑成片不存在，请使用剪辑接口返回的成片地址", status_code=404)
+    return FileResponse(
+        path,
+        media_type="video/mp4",
+        filename=f"{draft_id}_clipped.mp4",
+    )
+
+
+@router.patch("/{draft_id}", response_model=ResponseEnvelope[CreationDraftRead])
+def update_creation_draft(
+    draft_id: str,
+    payload: CreationDraftUpdateRequest,
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[CreationDraftRead]:
+    data = service.update(user_id=context.user.id, draft_id=draft_id, payload=payload)
+    return success_response(data, message="creation draft updated")
+
+
+@router.post("/{draft_id}/digital-human-asset", response_model=ResponseEnvelope[CreationDraftRead])
+def update_creation_draft_digital_human_asset(
+    draft_id: str,
+    payload: DigitalHumanAssetUpdateRequest,
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[CreationDraftRead]:
+    data = service.update_digital_human_asset(user_id=context.user.id, draft_id=draft_id, payload=payload)
+    return success_response(data, message="digital human asset updated")
+
+
+@router.delete("/{draft_id}", response_model=ResponseEnvelope[dict])
+def delete_creation_draft(
+    draft_id: str,
+    context: AuthContext = Depends(get_current_auth_context),
+    service: CreationDraftService = Depends(get_creation_draft_service),
+) -> ResponseEnvelope[dict]:
+    service.delete(user_id=context.user.id, draft_id=draft_id)
+    return success_response({"draft_id": draft_id}, message="creation draft deleted")
