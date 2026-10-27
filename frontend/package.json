@@ -1,0 +1,29 @@
+{
+  "name": "frontend-vue3-refactor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "compare:pages": "node scripts/compare-pages.mjs",
+    "screenshot:legacy": "node scripts/screenshot-legacy.mjs",
+    "screenshot:vue": "node scripts/screenshot-vue.mjs"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.58.2",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "dompurify": "^3.3.3",
+    "marked": "^17.0.5",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "vue": "^3.5.31",
+    "vue-router": "^5.0.4"
+  }
+}

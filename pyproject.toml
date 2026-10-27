@@ -1,0 +1,11 @@
+[project]
+name = "ai-content-automation-workspace"
+version = "0.1.0"
+description = "Unified workspace for AI content automation"
+requires-python = "==3.12.*"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "backend",
+]

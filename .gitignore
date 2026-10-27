@@ -1,0 +1,53 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Other
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+Tiktok/_meta/local_llm_config.json
+
+# Local assets / generated intermediates
+docs/source_materials/*.pptx
+backend/scene_replace_service/temp/
+backend/scene_replace_service/models/*.pth
+# Local agent scratch
+.tmp/
+
+
+# Local database dumps / credentials
+backend/app/db/mysql/ai_content_automation_2026-05-09_152359.sql
+docs/数据库设计/ai_content_automation_2026-05-06_105451.sql
+测试.py
+dev_doc/
+
+# Submission hygiene
+backend/agent-stack/crawler-engine/config/accounts_cookies.xlsx
+backend/agent-stack/social-auto-upload-main/uploader/xhs_uploader/accounts.ini
+backend/agent-stack/cookie-bridge/extension.zip
