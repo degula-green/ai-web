@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `background_assets` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT NULL,
+  `name` VARCHAR(128) NOT NULL,
+  `media_type` VARCHAR(16) NOT NULL,
+  `asset_url` VARCHAR(1024) NOT NULL,
+  `thumbnail_url` VARCHAR(1024) NULL,
+  `source_type` VARCHAR(16) NOT NULL DEFAULT 'user',
+  `status` VARCHAR(16) NOT NULL DEFAULT 'active',
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_deleted` TINYINT NOT NULL DEFAULT 0,
+  `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_background_assets_user_id` (`user_id`),
+  KEY `idx_background_assets_media_type` (`media_type`),
+  KEY `idx_background_assets_source_type` (`source_type`),
+  KEY `idx_background_assets_status` (`status`),
+  KEY `idx_background_assets_is_deleted` (`is_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频剪辑背景素材库';
