@@ -1,0 +1,1559 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>视频模板弹窗原型</title>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --panel: #ffffff;
+      --line: #d9e3ef;
+      --line-strong: #c5d5e8;
+      --text: #14243a;
+      --muted: #6a7a90;
+      --blue: #2563eb;
+      --blue-soft: rgba(37, 99, 235, 0.08);
+      --shadow: 0 18px 42px rgba(45, 67, 96, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); }
+    button, input, select, textarea { font: inherit; }
+    body { padding: 24px; }
+
+    .frame {
+      min-height: calc(100vh - 48px);
+      border-radius: 24px;
+      background: linear-gradient(180deg, #eef3f9 0%, #e8eef7 100%);
+      border: 1px solid #dde6f0;
+      padding: 16px;
+    }
+
+    .dialog {
+      width: min(1480px, calc(100vw - 64px));
+      max-height: calc(100vh - 80px);
+      overflow: auto;
+      margin: 0 auto;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .head h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn,
+    .btn-primary,
+    .btn-soft {
+      height: 38px;
+      border-radius: 12px;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: #274160;
+    }
+
+    .btn-primary {
+      border: none;
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-soft {
+      border: 1px solid #dbe7fb;
+      background: #f5f9ff;
+      color: #2563eb;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .template-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .template-card.active {
+      border-color: #8db2f0;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1);
+    }
+
+    .template-cover {
+      aspect-ratio: 3 / 5;
+      background: linear-gradient(180deg, #e8eef7 0%, #cdd8e7 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-cover.yellow { background: linear-gradient(180deg, #fce08f 0%, #c7ceb9 100%); }
+    .template-cover.orange { background: linear-gradient(180deg, #fdc38d 0%, #b3b9c4 100%); }
+    .template-cover.blue { background: linear-gradient(180deg, #bdd4ff 0%, #7d95cc 100%); }
+    .template-cover.dark { background: linear-gradient(180deg, #c6d0de 0%, #8b99ad 100%); }
+
+    .template-demo-title {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 3px 12px rgba(15, 23, 42, 0.28);
+    }
+
+    .template-demo-subtitle {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      display: inline-block;
+      width: fit-content;
+      max-width: calc(100% - 28px);
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.76);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .template-name {
+      padding: 12px 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: center;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 16px;
+    }
+
+    .panel h3,
+    .section-head strong {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .cover-box {
+      aspect-ratio: 3 / 5;
+      border: 1px dashed var(--line-strong);
+      border-radius: 18px;
+      background: #fafcff;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .cover-plus {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: #55749d;
+      position: relative;
+      z-index: 2;
+    }
+
+    .cover-hover {
+      position: absolute;
+      left: calc(50% + 40px);
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.16s ease;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .cover-box:hover .cover-hover { opacity: 1; }
+
+    .cover-preview {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    .cover-box.has-cover .cover-preview { display: block; }
+    .cover-box.has-cover .cover-plus,
+    .cover-box.has-cover .cover-hover { display: none; }
+
+    .preview-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #d7e0ec 0%, #b0bccd 100%);
+    }
+
+    .bg-keep { background: linear-gradient(180deg, #d7e0ec 0%, #b0bccd 100%); }
+    .bg-image { background: linear-gradient(180deg, rgba(19, 34, 58, 0.14), rgba(19, 34, 58, 0.34)), linear-gradient(135deg, #8ab8f4 0%, #4f79ba 100%); }
+    .bg-video { background: linear-gradient(180deg, rgba(19, 34, 58, 0.18), rgba(19, 34, 58, 0.34)), linear-gradient(135deg, #9ad0ff 0%, #4a85d8 100%); }
+    .bg-poster { background: linear-gradient(135deg, #fde68a 0%, #fb923c 56%, #f97316 100%); }
+
+    .preview-title,
+    .preview-badge,
+    .preview-subtitles {
+      position: absolute;
+      z-index: 2;
+    }
+
+    .preview-title {
+      left: 18px;
+      right: 18px;
+      color: #ffffff;
+      text-shadow: 0 3px 14px rgba(15, 23, 42, 0.28);
+    }
+
+    .preview-title.top-left { top: 18px; text-align: left; }
+    .preview-title.top-center { top: 18px; text-align: center; }
+    .preview-title.bottom-left { bottom: 118px; text-align: left; }
+
+    .preview-title strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .preview-title span {
+      display: block;
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .preview-badge {
+      top: 18px;
+      right: 18px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.56);
+      color: #fff7d4;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .preview-human {
+      position: absolute;
+      left: 50%;
+      bottom: 72px;
+      transform: translateX(-50%);
+      width: 62%;
+      height: 62%;
+      border-radius: 24px 24px 12px 12px;
+      background:
+        radial-gradient(circle at 50% 14%, rgba(255,255,255,0.42), transparent 10%),
+        linear-gradient(180deg, rgba(17,24,39,0.1), rgba(17,24,39,0.03)),
+        linear-gradient(180deg, #f5d2bb 0%, #efb598 34%, #b7c7de 35%, #7288ab 100%);
+      box-shadow: 0 16px 28px rgba(15, 23, 42, 0.16);
+    }
+
+    .preview-subtitles {
+      left: 14px;
+      right: 14px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preview-subtitles.left .sub-line { margin-right: auto; text-align: left; }
+    .preview-subtitles.center .sub-line { margin-left: auto; margin-right: auto; text-align: center; }
+
+    .sub-line {
+      display: inline-block;
+      max-width: 100%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .sub-clean .sub-line { background: rgba(15,23,42,0.74); color: #fff; }
+    .sub-outline .sub-line { background: rgba(255,255,255,0.92); color: #0f172a; }
+    .sub-highlight .sub-line { background: rgba(255,244,177,0.96); color: #2f2300; }
+    .sub-double .sub-line { background: rgba(12,30,61,0.82); color: #fff; border-left: 4px solid #60a5fa; }
+
+    .section + .section { margin-top: 14px; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .editable-title {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .editable-title:hover {
+      color: var(--blue);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .select,
+    .range-value {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 0 12px;
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: rgba(37, 99, 235, 0.42);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .segment {
+      min-height: 54px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      text-align: left;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .segment.active {
+      border-color: #8db2f0;
+      background: #f6f9ff;
+    }
+
+    .segment strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #183251;
+    }
+
+    .segment span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .slider-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .slider-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .slider-card input[type="range"] {
+      width: 100%;
+    }
+
+    .asset-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toggle-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 54px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #e6edf8;
+      cursor: pointer;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+      transition: left 0.18s ease;
+    }
+
+    .toggle.on {
+      background: rgba(37, 99, 235, 0.28);
+      border-color: rgba(37, 99, 235, 0.32);
+    }
+
+    .toggle.on::after { left: 25px; }
+
+    .asset-modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 30;
+    }
+
+    .asset-modal-mask.open { display: flex; }
+
+    .asset-modal {
+      width: min(1200px, calc(100vw - 64px));
+      max-height: calc(100vh - 80px);
+      overflow: auto;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .choice-card {
+      min-height: 116px;
+      border-radius: 18px;
+      border: 1px solid #dbe7fb;
+      background: #fff;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .choice-card.active {
+      border-color: #8db2f0;
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.08);
+    }
+
+    .choice-card strong {
+      display: block;
+      margin: 12px 0 8px;
+      font-size: 15px;
+    }
+
+    .choice-card span:last-child {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .modal-toolbar {
+      margin: 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .current-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .filter-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #35c26b;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .library-panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      min-height: 320px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .library-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .asset-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .asset-card.active {
+      border-color: #8db2f0;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.08);
+    }
+
+    .asset-thumb {
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(180deg, #e8eef7 0%, #ccd7e8 100%);
+      position: relative;
+    }
+
+    .asset-thumb.image { background: linear-gradient(135deg, #9bc0f7 0%, #5b84be 100%); }
+    .asset-thumb.video { background: linear-gradient(135deg, #b4d4ff 0%, #4d82d7 100%); }
+    .asset-thumb.audio { background: linear-gradient(135deg, #d7e5ff 0%, #8eaef0 100%); }
+
+    .asset-meta {
+      padding: 12px;
+    }
+
+    .asset-meta strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .asset-meta span {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .asset-empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1280px) {
+      .template-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .editor-grid,
+      .field-grid,
+      .segmented,
+      .slider-grid,
+      .choice-grid,
+      .library-grid,
+      .asset-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="dialog">
+      <div id="selectView" class="view active">
+        <div class="head">
+          <h2>选择视频模板</h2>
+          <div class="actions">
+            <button class="btn" type="button" id="closeButton">关闭</button>
+            <button class="btn-primary" type="button" id="addButton">新增</button>
+          </div>
+        </div>
+        <div class="template-grid" id="templateGrid"></div>
+      </div>
+
+      <div id="editorView" class="view">
+        <div class="head">
+          <button class="editable-title" type="button" id="editorTitle">新建模板</button>
+          <div class="actions">
+            <button class="btn" type="button" id="backButton">返回</button>
+            <button class="btn-primary" type="button" id="saveButton">保存模板</button>
+          </div>
+        </div>
+
+        <div class="editor-grid">
+          <div class="panel">
+            <h3>模板封面</h3>
+            <div class="cover-box" id="coverBox">
+              <div class="cover-preview" id="coverPreview">
+                <div class="preview-bg bg-keep" id="previewBg"></div>
+                <div class="preview-title top-left" id="previewTitle">
+                  <strong id="previewTitleMain">主标题</strong>
+                  <span id="previewTitleSub">副标题</span>
+                </div>
+                <div class="preview-badge" id="previewBadge">角标</div>
+                <div class="preview-human"></div>
+                <div class="preview-subtitles center sub-clean" id="previewSubtitles">
+                  <div class="sub-line" id="previewLine1">字幕样式预览</div>
+                  <div class="sub-line" id="previewLine2">第二行预览</div>
+                </div>
+              </div>
+              <div class="cover-plus">+</div>
+              <div class="cover-hover">添加封面</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section">
+              <div class="section-head">
+                <strong>标题设置</strong>
+                <span class="tag">标题</span>
+              </div>
+              <div class="segmented" id="titleModes"></div>
+              <div class="field-grid" style="margin-top:12px;">
+                <div class="field">
+                  <label for="titleAlignInput">标题对齐</label>
+                  <select id="titleAlignInput" class="select">
+                    <option value="top-left">顶部左对齐</option>
+                    <option value="top-center">顶部居中</option>
+                    <option value="bottom-left">底部左对齐</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="titleFontInput">标题字体样式</label>
+                  <select id="titleFontInput" class="select">
+                    <option value="default">标准</option>
+                    <option value="bold">加粗</option>
+                    <option value="brand">品牌感</option>
+                    <option value="serif">衬线感</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-grid">
+                <div class="slider-card">
+                  <div class="slider-head"><span>标题大小</span><strong id="titleSizeValue">24</strong></div>
+                  <input id="titleSizeInput" type="range" min="18" max="40" step="1" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>标题 X 偏移</span><strong id="titleOffsetXValue">0</strong></div>
+                  <input id="titleOffsetXInput" type="range" min="-120" max="120" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>标题 Y 偏移</span><strong id="titleOffsetYValue">0</strong></div>
+                  <input id="titleOffsetYInput" type="range" min="-160" max="160" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>副标题大小</span><strong id="subtitleTitleSizeValue">13</strong></div>
+                  <input id="subtitleTitleSizeInput" type="range" min="10" max="24" step="1" />
+                </div>
+              </div>
+              <div class="slider-grid">
+                <div class="slider-card">
+                  <div class="slider-head"><span>角标大小</span><strong id="badgeSizeValue">12</strong></div>
+                  <input id="badgeSizeInput" type="range" min="10" max="22" step="1" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>角标 X 偏移</span><strong id="badgeOffsetXValue">0</strong></div>
+                  <input id="badgeOffsetXInput" type="range" min="-120" max="120" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>角标 Y 偏移</span><strong id="badgeOffsetYValue">0</strong></div>
+                  <input id="badgeOffsetYInput" type="range" min="-120" max="120" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>角标字体样式</span></div>
+                  <select id="badgeFontInput" class="select">
+                    <option value="default">标准</option>
+                    <option value="bold">加粗</option>
+                    <option value="brand">品牌感</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-head">
+                <strong>背景设置</strong>
+                <span class="tag">背景</span>
+              </div>
+              <div class="asset-summary">
+                <span id="backgroundSummaryText">未选择背景素材</span>
+                <div class="actions">
+                  <button class="btn-soft" type="button" id="chooseBackgroundButton">选择背景素材</button>
+                  <button class="btn" type="button" id="uploadBackgroundButton">上传文件</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-head">
+                <strong>背景音乐</strong>
+                <span class="tag">音乐</span>
+              </div>
+              <div class="asset-summary">
+                <span id="bgmSummaryText">未选择背景音乐</span>
+                <div class="actions">
+                  <button class="btn-soft" type="button" id="chooseBgmButton">选择背景音乐</button>
+                  <button class="btn" type="button" id="uploadBgmButton">上传文件</button>
+                </div>
+              </div>
+              <div class="slider-grid">
+                <div class="slider-card">
+                  <div class="slider-head"><span>背景音乐音量</span><strong id="bgmVolumeValue">20</strong></div>
+                  <input id="bgmVolumeInput" type="range" min="0" max="100" step="5" />
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-head">
+                <strong>字幕设置</strong>
+                <span class="tag">字幕</span>
+              </div>
+              <div class="segmented" id="subtitleModes"></div>
+              <div class="field-grid" style="margin-top:12px;">
+                <div class="field">
+                  <label for="subtitleAlignInput">字幕对齐</label>
+                  <select id="subtitleAlignInput" class="select">
+                    <option value="center">居中</option>
+                    <option value="left">左对齐</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="subtitleFontInput">字幕字体样式</label>
+                  <select id="subtitleFontInput" class="select">
+                    <option value="default">标准</option>
+                    <option value="bold">加粗</option>
+                    <option value="brand">品牌感</option>
+                    <option value="serif">衬线感</option>
+                  </select>
+                </div>
+              </div>
+              <div class="slider-grid">
+                <div class="slider-card">
+                  <div class="slider-head"><span>字幕大小</span><strong id="subtitleSizeValue">15</strong></div>
+                  <input id="subtitleSizeInput" type="range" min="12" max="28" step="1" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>字幕 X 偏移</span><strong id="subtitleOffsetXValue">0</strong></div>
+                  <input id="subtitleOffsetXInput" type="range" min="-120" max="120" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>字幕 Y 偏移</span><strong id="subtitleOffsetYValue">0</strong></div>
+                  <input id="subtitleOffsetYInput" type="range" min="-180" max="120" step="2" />
+                </div>
+                <div class="slider-card">
+                  <div class="slider-head"><span>双行字幕</span></div>
+                  <div class="toggle-row" style="margin-top:0;">
+                    <div style="font-size:12px;color:var(--muted);font-weight:700;">启用第二行</div>
+                    <button id="subtitleDoubleToggle" class="toggle" type="button"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input id="backgroundUploadInput" type="file" class="hidden" accept="image/*,video/*" />
+  <input id="bgmUploadInput" type="file" class="hidden" accept="audio/*" />
+
+  <div class="asset-modal-mask" id="backgroundModalMask">
+    <div class="asset-modal">
+      <div class="head">
+        <div>
+          <h2>选择背景素材</h2>
+        </div>
+        <div class="actions">
+          <button class="btn-soft" type="button" id="refreshBackgroundButton">刷新素材</button>
+          <button class="btn" type="button" id="closeBackgroundModalButton">关闭</button>
+        </div>
+      </div>
+
+      <div class="choice-grid" id="backgroundTypeGrid"></div>
+
+      <div class="modal-toolbar">
+        <div class="current-filter">
+          <span class="filter-dot"></span>
+          <span id="backgroundFilterText">当前选择：原视频背景</span>
+        </div>
+        <button class="btn-primary" type="button" id="backgroundUploadActionButton">上传新背景</button>
+      </div>
+
+      <div class="library-grid">
+        <section class="library-panel">
+          <div class="library-head">
+            <span>官方背景</span>
+            <span id="officialBackgroundCount">0 个</span>
+          </div>
+          <div id="officialBackgroundGrid" class="asset-grid"></div>
+          <div id="officialBackgroundEmpty" class="asset-empty hidden">当前没有官方背景素材。</div>
+        </section>
+
+        <section class="library-panel">
+          <div class="library-head">
+            <span>我的背景</span>
+            <span id="userBackgroundCount">0 个</span>
+          </div>
+          <div id="userBackgroundGrid" class="asset-grid"></div>
+          <div id="userBackgroundEmpty" class="asset-empty hidden">你还没有上传背景素材。</div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="asset-modal-mask" id="bgmModalMask">
+    <div class="asset-modal">
+      <div class="head">
+        <div>
+          <h2>选择背景音乐</h2>
+        </div>
+        <div class="actions">
+          <button class="btn-soft" type="button" id="refreshBgmButton">刷新素材</button>
+          <button class="btn" type="button" id="closeBgmModalButton">关闭</button>
+        </div>
+      </div>
+
+      <div class="modal-toolbar">
+        <div class="current-filter">
+          <span class="filter-dot"></span>
+          <span>当前筛选：背景音乐</span>
+        </div>
+        <button class="btn-primary" type="button" id="bgmUploadActionButton">上传新背景音乐</button>
+      </div>
+
+      <div class="library-grid">
+        <section class="library-panel">
+          <div class="library-head">
+            <span>官方背景音乐</span>
+            <span id="officialBgmCount">0 个</span>
+          </div>
+          <div id="officialBgmGrid" class="asset-grid"></div>
+          <div id="officialBgmEmpty" class="asset-empty hidden">当前没有官方背景音乐。</div>
+        </section>
+
+        <section class="library-panel">
+          <div class="library-head">
+            <span>我的背景音乐</span>
+            <span id="userBgmCount">0 个</span>
+          </div>
+          <div id="userBgmGrid" class="asset-grid"></div>
+          <div id="userBgmEmpty" class="asset-empty hidden">你还没有上传背景音乐。</div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'clip-template-popup-prototype-v6';
+
+    const titleModes = [
+      { value: 'none', label: '不加标题', desc: '只保留字幕层' },
+      { value: 'double', label: '主副标题', desc: '标题与副标题同显' },
+      { value: 'badge', label: '标题加角标', desc: '标题与角标同显' },
+      { value: 'bottom', label: '底栏标题', desc: '标题落在底部' },
+    ];
+
+    const subtitleModes = [
+      { value: 'clean', label: '简洁白字', desc: '适合通用口播' },
+      { value: 'outline', label: '高对比字幕', desc: '背景复杂也清晰' },
+      { value: 'highlight', label: '重点词底色', desc: '突出信息点' },
+      { value: 'double', label: '双行节奏', desc: '适合快节奏' },
+    ];
+
+    const backgroundTypes = [
+      { value: 'original', label: '原视频背景', desc: '保留当前数字人成片原始背景', icon: '▣' },
+      { value: 'image_fill', label: '图片背景', desc: '适合直播间、海报墙、品牌视觉图', icon: '▤' },
+      { value: 'video_fill', label: '视频背景', desc: '适合动态场景、办公区或产品氛围视频', icon: '▥' },
+    ];
+
+    const defaultTemplates = [
+      {
+        id: 't0',
+        name: '不用模板',
+        coverTheme: '',
+        title: { mode: 'none', align: 'top-left', font: 'default', size: 24, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'default', badgeSize: 12, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'original', assetId: null, assetName: '' },
+        bgm: { assetId: null, assetName: '', volume: 20 },
+        subtitle: { mode: 'clean', align: 'center', font: 'default', size: 15, offsetX: 0, offsetY: 0, doubleLine: false },
+      },
+      {
+        id: 't1',
+        name: '黄白字幕',
+        coverTheme: 'yellow',
+        title: { mode: 'none', align: 'top-left', font: 'bold', size: 24, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'default', badgeSize: 12, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'image_fill', assetId: 'bg_img_1', assetName: '雪山风格图' },
+        bgm: { assetId: 'bgm_1', assetName: '铺底氛围', volume: 20 },
+        subtitle: { mode: 'highlight', align: 'left', font: 'bold', size: 16, offsetX: 0, offsetY: 0, doubleLine: true },
+      },
+      {
+        id: 't2',
+        name: '品牌讲解',
+        coverTheme: 'orange',
+        title: { mode: 'double', align: 'top-left', font: 'brand', size: 26, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'brand', badgeSize: 12, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'video_fill', assetId: 'bg_video_1', assetName: '办公区动态背景' },
+        bgm: { assetId: 'bgm_2', assetName: '讲述感背景音乐', volume: 15 },
+        subtitle: { mode: 'outline', align: 'center', font: 'default', size: 15, offsetX: 0, offsetY: 0, doubleLine: false },
+      },
+      {
+        id: 't3',
+        name: '活动促销',
+        coverTheme: 'blue',
+        title: { mode: 'badge', align: 'top-left', font: 'bold', size: 28, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'bold', badgeSize: 13, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'image_fill', assetId: 'bg_img_2', assetName: '促销海报背景' },
+        bgm: { assetId: 'bgm_3', assetName: '强节奏背景音乐', volume: 30 },
+        subtitle: { mode: 'double', align: 'left', font: 'bold', size: 16, offsetX: 0, offsetY: 0, doubleLine: true },
+      },
+      {
+        id: 't4',
+        name: '冷静讲述',
+        coverTheme: 'dark',
+        title: { mode: 'bottom', align: 'bottom-left', font: 'serif', size: 24, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'default', badgeSize: 12, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'original', assetId: null, assetName: '' },
+        bgm: { assetId: null, assetName: '', volume: 0 },
+        subtitle: { mode: 'clean', align: 'center', font: 'serif', size: 15, offsetX: 0, offsetY: 0, doubleLine: false },
+      },
+    ];
+
+    const officialBackgroundAssets = [
+      { id: 'bg_img_1', name: '雪山风格图', kind: 'image_fill', owner: 'official' },
+      { id: 'bg_img_2', name: '促销海报背景', kind: 'image_fill', owner: 'official' },
+      { id: 'bg_video_1', name: '办公区动态背景', kind: 'video_fill', owner: 'official' },
+    ];
+
+    const officialBgmAssets = [
+      { id: 'bgm_1', name: '铺底氛围', owner: 'official' },
+      { id: 'bgm_2', name: '讲述感背景音乐', owner: 'official' },
+      { id: 'bgm_3', name: '强节奏背景音乐', owner: 'official' },
+    ];
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function loadTemplates() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return clone(defaultTemplates);
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length ? parsed : clone(defaultTemplates);
+      } catch {
+        return clone(defaultTemplates);
+      }
+    }
+
+    const state = {
+      templates: loadTemplates(),
+      activeId: 't1',
+      draft: null,
+      editorMode: 'create',
+      backgroundKind: 'original',
+      userBackgroundAssets: [
+        { id: 'user_bg_1', name: '古风场景图', kind: 'image_fill', owner: 'user' },
+      ],
+      userBgmAssets: [
+        { id: 'user_bgm_1', name: '我上传的背景音乐', owner: 'user' },
+      ],
+    };
+
+    if (!state.templates.length) state.templates = clone(defaultTemplates);
+    if (!state.templates.some((item) => item.id === state.activeId)) state.activeId = state.templates[0].id;
+
+    const selectView = document.getElementById('selectView');
+    const editorView = document.getElementById('editorView');
+    const templateGrid = document.getElementById('templateGrid');
+    const backgroundUploadInput = document.getElementById('backgroundUploadInput');
+    const bgmUploadInput = document.getElementById('bgmUploadInput');
+
+    function showView(view) {
+      selectView.classList.toggle('active', view === 'select');
+      editorView.classList.toggle('active', view === 'editor');
+    }
+
+    function getActiveTemplate() {
+      return state.templates.find((item) => item.id === state.activeId) || state.templates[0];
+    }
+
+    function getBackgroundCoverClass(template) {
+      if (template.background.mode === 'image_fill') return 'image';
+      if (template.background.mode === 'video_fill') return 'blue';
+      if (template.background.mode === 'original') return template.coverTheme || '';
+      return template.coverTheme || '';
+    }
+
+    function renderTemplateCards() {
+      templateGrid.innerHTML = '';
+      state.templates.forEach((template) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `template-card ${template.id === state.activeId ? 'active' : ''}`;
+        card.innerHTML = `
+          <div class="template-cover ${getBackgroundCoverClass(template)}">
+            <div class="template-demo-title">${template.title.mode === 'none' ? '' : '主标题'}</div>
+            <div class="template-demo-subtitle">字幕预览</div>
+          </div>
+          <div class="template-name">${template.name}</div>
+        `;
+        card.addEventListener('click', () => {
+          state.activeId = template.id;
+          renderTemplateCards();
+        });
+        templateGrid.appendChild(card);
+      });
+    }
+
+    function renderSegmentGroup(containerId, options, value, onChange) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      options.forEach((option) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `segment ${value === option.value ? 'active' : ''}`;
+        button.innerHTML = `<strong>${option.label}</strong><span>${option.desc}</span>`;
+        button.addEventListener('click', () => onChange(option.value));
+        container.appendChild(button);
+      });
+    }
+
+    function syncRange(id, valueId, value) {
+      document.getElementById(id).value = String(value);
+      document.getElementById(valueId).textContent = String(value);
+    }
+
+    function applyFontStyle(el, font) {
+      el.style.fontWeight = font === 'bold' ? '800' : font === 'brand' ? '700' : '700';
+      el.style.letterSpacing = font === 'brand' ? '0.02em' : '0';
+      el.style.fontFamily = font === 'serif' ? '"Songti SC", "STSong", serif' : '"Noto Sans SC", "PingFang SC", sans-serif';
+    }
+
+    function renderPreview() {
+      const draft = state.draft;
+      const previewBg = document.getElementById('previewBg');
+      const previewTitle = document.getElementById('previewTitle');
+      const previewTitleMain = document.getElementById('previewTitleMain');
+      const previewTitleSub = document.getElementById('previewTitleSub');
+      const previewBadge = document.getElementById('previewBadge');
+      const previewSubtitles = document.getElementById('previewSubtitles');
+      const previewLine1 = document.getElementById('previewLine1');
+      const previewLine2 = document.getElementById('previewLine2');
+      const coverBox = document.getElementById('coverBox');
+
+      coverBox.classList.toggle('has-cover', draft.coverAdded);
+
+      if (draft.background.mode === 'image_fill') previewBg.className = 'preview-bg bg-image';
+      else if (draft.background.mode === 'video_fill') previewBg.className = 'preview-bg bg-video';
+      else if (draft.background.assetName && draft.background.mode !== 'original') previewBg.className = 'preview-bg bg-poster';
+      else previewBg.className = 'preview-bg bg-keep';
+
+      previewTitle.className = `preview-title ${draft.title.align}`;
+      previewTitle.style.transform = `translate(${draft.title.offsetX}px, ${draft.title.offsetY}px)`;
+      previewTitleMain.style.fontSize = `${draft.title.size}px`;
+      previewTitleSub.style.fontSize = `${draft.title.subtitleSize}px`;
+      applyFontStyle(previewTitleMain, draft.title.font);
+      applyFontStyle(previewTitleSub, draft.title.font);
+      previewTitle.classList.toggle('hidden', draft.title.mode === 'none');
+      previewTitleSub.classList.toggle('hidden', draft.title.mode === 'none');
+
+      previewBadge.classList.toggle('hidden', draft.title.mode !== 'badge');
+      previewBadge.style.transform = `translate(${draft.title.badgeOffsetX}px, ${draft.title.badgeOffsetY}px)`;
+      previewBadge.style.fontSize = `${draft.title.badgeSize}px`;
+      applyFontStyle(previewBadge, draft.title.badgeFont);
+
+      previewSubtitles.className = `preview-subtitles ${draft.subtitle.align} sub-${draft.subtitle.mode}`;
+      previewSubtitles.style.transform = `translate(${draft.subtitle.offsetX}px, ${draft.subtitle.offsetY}px)`;
+      previewLine1.style.fontSize = `${draft.subtitle.size}px`;
+      previewLine2.style.fontSize = `${draft.subtitle.size}px`;
+      applyFontStyle(previewLine1, draft.subtitle.font);
+      applyFontStyle(previewLine2, draft.subtitle.font);
+      previewLine2.classList.toggle('hidden', !draft.subtitle.doubleLine);
+    }
+
+    function updateAssetSummary() {
+      document.getElementById('backgroundSummaryText').textContent = state.draft.background.mode === 'original'
+        ? '当前选择：原视频背景'
+        : (state.draft.background.assetName || '未选择背景素材');
+      document.getElementById('bgmSummaryText').textContent = state.draft.bgm.assetName || '未选择背景音乐';
+    }
+
+    function syncEditorFields() {
+      const draft = state.draft;
+      document.getElementById('editorTitle').textContent = draft.name || '新建模板';
+
+      document.getElementById('titleAlignInput').value = draft.title.align;
+      document.getElementById('titleFontInput').value = draft.title.font;
+      document.getElementById('badgeFontInput').value = draft.title.badgeFont;
+      syncRange('titleSizeInput', 'titleSizeValue', draft.title.size);
+      syncRange('titleOffsetXInput', 'titleOffsetXValue', draft.title.offsetX);
+      syncRange('titleOffsetYInput', 'titleOffsetYValue', draft.title.offsetY);
+      syncRange('subtitleTitleSizeInput', 'subtitleTitleSizeValue', draft.title.subtitleSize);
+      syncRange('badgeSizeInput', 'badgeSizeValue', draft.title.badgeSize);
+      syncRange('badgeOffsetXInput', 'badgeOffsetXValue', draft.title.badgeOffsetX);
+      syncRange('badgeOffsetYInput', 'badgeOffsetYValue', draft.title.badgeOffsetY);
+
+      document.getElementById('subtitleAlignInput').value = draft.subtitle.align;
+      document.getElementById('subtitleFontInput').value = draft.subtitle.font;
+      document.getElementById('subtitleDoubleToggle').classList.toggle('on', draft.subtitle.doubleLine);
+      syncRange('subtitleSizeInput', 'subtitleSizeValue', draft.subtitle.size);
+      syncRange('subtitleOffsetXInput', 'subtitleOffsetXValue', draft.subtitle.offsetX);
+      syncRange('subtitleOffsetYInput', 'subtitleOffsetYValue', draft.subtitle.offsetY);
+      syncRange('bgmVolumeInput', 'bgmVolumeValue', draft.bgm.volume);
+
+      renderSegmentGroup('titleModes', titleModes, draft.title.mode, (value) => {
+        draft.title.mode = value;
+        renderPreview();
+      });
+
+      renderSegmentGroup('subtitleModes', subtitleModes, draft.subtitle.mode, (value) => {
+        draft.subtitle.mode = value;
+        renderPreview();
+      });
+
+      updateAssetSummary();
+      renderPreview();
+    }
+
+    function openCreateEditor() {
+      state.editorMode = 'create';
+      state.draft = {
+        id: `t${Date.now()}`,
+        name: '未命名模板',
+        coverTheme: '',
+        coverAdded: false,
+        title: { mode: 'none', align: 'top-left', font: 'default', size: 24, offsetX: 0, offsetY: 0, subtitleSize: 13, badgeFont: 'default', badgeSize: 12, badgeOffsetX: 0, badgeOffsetY: 0 },
+        background: { mode: 'original', assetId: null, assetName: '' },
+        bgm: { assetId: null, assetName: '', volume: 20 },
+        subtitle: { mode: 'clean', align: 'center', font: 'default', size: 15, offsetX: 0, offsetY: 0, doubleLine: false },
+      };
+      syncEditorFields();
+      showView('editor');
+    }
+
+    function openEditEditor() {
+      state.editorMode = 'edit';
+      const source = clone(getActiveTemplate());
+      source.coverAdded = true;
+      state.draft = source;
+      syncEditorFields();
+      showView('editor');
+    }
+
+    function saveDraft() {
+      const draft = clone(state.draft);
+      const index = state.templates.findIndex((item) => item.id === draft.id);
+      if (index >= 0) state.templates[index] = draft;
+      else state.templates.push(draft);
+      state.activeId = draft.id;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.templates));
+      renderTemplateCards();
+      showView('select');
+    }
+
+    function renderBackgroundTypeChoices() {
+      const container = document.getElementById('backgroundTypeGrid');
+      container.innerHTML = '';
+      backgroundTypes.forEach((item) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `choice-card ${state.backgroundKind === item.value ? 'active' : ''}`;
+        button.innerHTML = `<span>${item.icon}</span><strong>${item.label}</strong><span>${item.desc}</span>`;
+        button.addEventListener('click', () => {
+          state.backgroundKind = item.value;
+          renderBackgroundTypeChoices();
+          renderBackgroundLibraries();
+        });
+        container.appendChild(button);
+      });
+    }
+
+    function openBackgroundModal() {
+      document.getElementById('backgroundModalMask').classList.add('open');
+      state.backgroundKind = state.draft.background.mode || 'original';
+      renderBackgroundTypeChoices();
+      renderBackgroundLibraries();
+    }
+
+    function closeBackgroundModal() {
+      document.getElementById('backgroundModalMask').classList.remove('open');
+    }
+
+    function filteredBackgroundAssets(source) {
+      if (state.backgroundKind === 'original') return [];
+      return source.filter((item) => item.kind === state.backgroundKind);
+    }
+
+    function renderBackgroundLibraries() {
+      const filterText = state.backgroundKind === 'original'
+        ? '当前选择：原视频背景'
+        : state.backgroundKind === 'video_fill'
+          ? '当前筛选：视频背景素材'
+          : '当前筛选：图片背景素材';
+      document.getElementById('backgroundFilterText').textContent = filterText;
+      document.getElementById('backgroundUploadActionButton').textContent = state.backgroundKind === 'video_fill' ? '上传新背景视频' : '上传新背景图片';
+
+      const official = filteredBackgroundAssets(officialBackgroundAssets);
+      const user = filteredBackgroundAssets(state.userBackgroundAssets);
+      renderAssetGrid('officialBackgroundGrid', 'officialBackgroundEmpty', official, state.draft.background.assetId, (asset) => {
+        state.draft.background.mode = asset.kind;
+        state.draft.background.assetId = asset.id;
+        state.draft.background.assetName = asset.name;
+        state.draft.coverAdded = true;
+        updateAssetSummary();
+        renderPreview();
+        renderBackgroundLibraries();
+      }, false);
+      renderAssetGrid('userBackgroundGrid', 'userBackgroundEmpty', user, state.draft.background.assetId, (asset) => {
+        state.draft.background.mode = asset.kind;
+        state.draft.background.assetId = asset.id;
+        state.draft.background.assetName = asset.name;
+        state.draft.coverAdded = true;
+        updateAssetSummary();
+        renderPreview();
+        renderBackgroundLibraries();
+      }, true);
+      document.getElementById('officialBackgroundCount').textContent = `${official.length} 个`;
+      document.getElementById('userBackgroundCount').textContent = `${user.length} 个`;
+    }
+
+    function openBgmModal() {
+      document.getElementById('bgmModalMask').classList.add('open');
+      renderBgmLibraries();
+    }
+
+    function closeBgmModal() {
+      document.getElementById('bgmModalMask').classList.remove('open');
+    }
+
+    function renderBgmLibraries() {
+      renderAssetGrid('officialBgmGrid', 'officialBgmEmpty', officialBgmAssets, state.draft.bgm.assetId, (asset) => {
+        state.draft.bgm.assetId = asset.id;
+        state.draft.bgm.assetName = asset.name;
+        updateAssetSummary();
+        renderBgmLibraries();
+      }, false, 'audio');
+      renderAssetGrid('userBgmGrid', 'userBgmEmpty', state.userBgmAssets, state.draft.bgm.assetId, (asset) => {
+        state.draft.bgm.assetId = asset.id;
+        state.draft.bgm.assetName = asset.name;
+        updateAssetSummary();
+        renderBgmLibraries();
+      }, true, 'audio');
+      document.getElementById('officialBgmCount').textContent = `${officialBgmAssets.length} 个`;
+      document.getElementById('userBgmCount').textContent = `${state.userBgmAssets.length} 个`;
+    }
+
+    function renderAssetGrid(gridId, emptyId, items, activeId, onSelect, allowDelete = false, thumbKind = null) {
+      const grid = document.getElementById(gridId);
+      const empty = document.getElementById(emptyId);
+      grid.innerHTML = '';
+      empty.classList.toggle('hidden', items.length > 0);
+      if (!items.length) return;
+      items.forEach((asset) => {
+        const card = document.createElement('div');
+        card.className = `asset-card ${asset.id === activeId ? 'active' : ''}`;
+        const kind = thumbKind || (asset.kind === 'video_fill' ? 'video' : 'image');
+        card.innerHTML = `
+          <div class="asset-thumb ${kind}"></div>
+          <div class="asset-meta">
+            <strong>${asset.name}</strong>
+            <span>${kind === 'audio' ? '背景音乐' : asset.kind === 'video_fill' ? '视频背景' : '图片背景'}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => onSelect(asset));
+        if (allowDelete) {
+          const remove = document.createElement('button');
+          remove.className = 'btn';
+          remove.type = 'button';
+          remove.textContent = '删除';
+          remove.style.margin = '0 12px 12px';
+          remove.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (thumbKind === 'audio') {
+              state.userBgmAssets = state.userBgmAssets.filter((item) => item.id !== asset.id);
+              if (state.draft.bgm.assetId === asset.id) {
+                state.draft.bgm.assetId = null;
+                state.draft.bgm.assetName = '';
+              }
+              updateAssetSummary();
+              renderBgmLibraries();
+            } else {
+              state.userBackgroundAssets = state.userBackgroundAssets.filter((item) => item.id !== asset.id);
+              if (state.draft.background.assetId === asset.id) {
+                state.draft.background.assetId = null;
+                state.draft.background.assetName = '';
+                state.draft.background.mode = 'original';
+              }
+              updateAssetSummary();
+              renderPreview();
+              renderBackgroundLibraries();
+            }
+          });
+          card.appendChild(remove);
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById('addButton').addEventListener('click', openCreateEditor);
+    document.getElementById('backButton').addEventListener('click', () => showView('select'));
+    document.getElementById('saveButton').addEventListener('click', saveDraft);
+    document.getElementById('closeButton').addEventListener('click', () => {
+      alert('这里只做原型演示，正式版里这里会关闭弹窗。');
+    });
+
+    document.getElementById('editorTitle').addEventListener('click', () => {
+      const nextName = window.prompt('请输入模板名称', state.draft.name);
+      if (typeof nextName === 'string' && nextName.trim()) {
+        state.draft.name = nextName.trim();
+        document.getElementById('editorTitle').textContent = state.draft.name;
+      }
+    });
+
+    document.getElementById('titleAlignInput').addEventListener('change', (event) => {
+      state.draft.title.align = event.target.value;
+      renderPreview();
+    });
+    document.getElementById('titleFontInput').addEventListener('change', (event) => {
+      state.draft.title.font = event.target.value;
+      renderPreview();
+    });
+    document.getElementById('badgeFontInput').addEventListener('change', (event) => {
+      state.draft.title.badgeFont = event.target.value;
+      renderPreview();
+    });
+
+    [
+      ['titleSizeInput', 'size', 'title', 'titleSizeValue'],
+      ['titleOffsetXInput', 'offsetX', 'title', 'titleOffsetXValue'],
+      ['titleOffsetYInput', 'offsetY', 'title', 'titleOffsetYValue'],
+      ['subtitleTitleSizeInput', 'subtitleSize', 'title', 'subtitleTitleSizeValue'],
+      ['badgeSizeInput', 'badgeSize', 'title', 'badgeSizeValue'],
+      ['badgeOffsetXInput', 'badgeOffsetX', 'title', 'badgeOffsetXValue'],
+      ['badgeOffsetYInput', 'badgeOffsetY', 'title', 'badgeOffsetYValue'],
+      ['subtitleSizeInput', 'size', 'subtitle', 'subtitleSizeValue'],
+      ['subtitleOffsetXInput', 'offsetX', 'subtitle', 'subtitleOffsetXValue'],
+      ['subtitleOffsetYInput', 'offsetY', 'subtitle', 'subtitleOffsetYValue'],
+      ['bgmVolumeInput', 'volume', 'bgm', 'bgmVolumeValue'],
+    ].forEach(([id, key, scope, valueId]) => {
+      document.getElementById(id).addEventListener('input', (event) => {
+        state.draft[scope][key] = Number(event.target.value);
+        document.getElementById(valueId).textContent = String(state.draft[scope][key]);
+        renderPreview();
+      });
+    });
+
+    document.getElementById('subtitleAlignInput').addEventListener('change', (event) => {
+      state.draft.subtitle.align = event.target.value;
+      renderPreview();
+    });
+    document.getElementById('subtitleFontInput').addEventListener('change', (event) => {
+      state.draft.subtitle.font = event.target.value;
+      renderPreview();
+    });
+    document.getElementById('subtitleDoubleToggle').addEventListener('click', () => {
+      state.draft.subtitle.doubleLine = !state.draft.subtitle.doubleLine;
+      document.getElementById('subtitleDoubleToggle').classList.toggle('on', state.draft.subtitle.doubleLine);
+      renderPreview();
+    });
+
+    document.getElementById('chooseBackgroundButton').addEventListener('click', openBackgroundModal);
+    document.getElementById('uploadBackgroundButton').addEventListener('click', () => backgroundUploadInput.click());
+    document.getElementById('closeBackgroundModalButton').addEventListener('click', closeBackgroundModal);
+    document.getElementById('refreshBackgroundButton').addEventListener('click', renderBackgroundLibraries);
+    document.getElementById('backgroundUploadActionButton').addEventListener('click', () => backgroundUploadInput.click());
+
+    document.getElementById('chooseBgmButton').addEventListener('click', openBgmModal);
+    document.getElementById('uploadBgmButton').addEventListener('click', () => bgmUploadInput.click());
+    document.getElementById('closeBgmModalButton').addEventListener('click', closeBgmModal);
+    document.getElementById('refreshBgmButton').addEventListener('click', renderBgmLibraries);
+    document.getElementById('bgmUploadActionButton').addEventListener('click', () => bgmUploadInput.click());
+
+    backgroundUploadInput.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const kind = file.type.startsWith('video/') ? 'video_fill' : 'image_fill';
+      const asset = { id: `user_bg_${Date.now()}`, name: file.name, kind, owner: 'user' };
+      state.userBackgroundAssets.push(asset);
+      state.draft.background.mode = kind;
+      state.draft.background.assetId = asset.id;
+      state.draft.background.assetName = asset.name;
+      state.draft.coverAdded = true;
+      updateAssetSummary();
+      renderPreview();
+      renderBackgroundLibraries();
+      event.target.value = '';
+    });
+
+    bgmUploadInput.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const asset = { id: `user_bgm_${Date.now()}`, name: file.name, owner: 'user' };
+      state.userBgmAssets.push(asset);
+      state.draft.bgm.assetId = asset.id;
+      state.draft.bgm.assetName = asset.name;
+      updateAssetSummary();
+      renderBgmLibraries();
+      event.target.value = '';
+    });
+
+    document.getElementById('backgroundModalMask').addEventListener('click', (event) => {
+      if (event.target.id === 'backgroundModalMask') closeBackgroundModal();
+    });
+    document.getElementById('bgmModalMask').addEventListener('click', (event) => {
+      if (event.target.id === 'bgmModalMask') closeBgmModal();
+    });
+
+    templateGrid.addEventListener('dblclick', openEditEditor);
+
+    renderTemplateCards();
+    showView('select');
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>总体架构图 - AI内容自动化工作流系统</title>
+</head>
+<body style="background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px;">
+
+    <div style="font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; width: 100%; max-width: 1050px; padding: 40px 30px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); color: #333;">
+        
+
+        <div style="border: 2px dashed #4a90e2; border-radius: 10px; padding: 30px 20px 20px 20px; margin-bottom: 40px; position: relative; background: #f8fbff;">
+            <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #2b70c9; color: white; padding: 6px 24px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(43,112,201,0.3);">
+                数据感知与采集层
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="flex: 1; text-align: center; padding: 15px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight: bold; color: #1a569d; margin-bottom: 5px;">多平台源节点</div>
+                    <div style="font-size: 12px; color: #666;">小红书 / 抖音 / B站 / YouTube</div>
+                </div>
+                <div style="font-size: 18px; color: #2b70c9;">&#10132;</div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight: bold; color: #1a569d; margin-bottom: 5px;">分布式采集集群</div>
+                    <div style="font-size: 12px; color: #666;">Playwright + Requests + 代理池</div>
+                </div>
+                <div style="font-size: 18px; color: #2b70c9;">&#10132;</div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight: bold; color: #1a569d; margin-bottom: 5px;">清洗过滤管道</div>
+                    <div style="font-size: 12px; color: #666;">内容去重 / 风险初筛 / 字段对齐</div>
+                </div>
+                <div style="font-size: 18px; color: #2b70c9;">&#10132;</div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: #fffcf5; border: 1px solid #f6c06a; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight: bold; color: #d68b00; margin-bottom: 5px;">统一数据底座</div>
+                    <div style="font-size: 12px; color: #666;">MySQL (元数据) + MinIO (媒体)</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 24px; color: #e74c3c; margin-top: -30px; margin-bottom: 10px;">&#11015;</div>
+
+        <div style="border: 2px dashed #4a90e2; border-radius: 10px; padding: 30px 20px 20px 20px; margin-bottom: 40px; position: relative; background: #f8fbff;">
+            <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #2b70c9; color: white; padding: 6px 24px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(43,112,201,0.3);">
+                核心算力与多模态生成层
+            </div>
+            <div style="display: flex; justify-content: space-around; align-items: stretch; gap: 15px;">
+                <div style="flex: 1; display: flex; flex-direction: column; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px; overflow: hidden;">
+                     <div style="background: #eef5ff; padding: 10px; border-bottom: 1px solid #b3d4ff; font-weight: bold; text-align: center; color: #1a569d; font-size: 14px;">知识提炼解析器</div>
+                     <div style="padding: 12px; font-size: 12px; color: #555; text-align: center; line-height: 1.6; flex: 1;">
+                         <span style="display:inline-block; margin-bottom:4px; padding: 2px 6px; background:#f0f2f5; border-radius:3px;">DOM树拆解</span>
+                         <span style="display:inline-block; margin-bottom:4px; padding: 2px 6px; background:#f0f2f5; border-radius:3px;">多模态线索抽取</span><br>
+                         (HTML Parser + NLP)
+                     </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; font-size: 20px; color: #2b70c9;">&#10132;</div>
+                
+                <div style="flex: 1.8; display: flex; flex-direction: column; background: #ffffff; border: 2px solid #f6c06a; border-radius: 8px; overflow: hidden; transform: scale(1.02); box-shadow: 0 4px 12px rgba(246,192,106,0.15);">
+                     <div style="background: #fdf5e6; padding: 12px; border-bottom: 1px solid #fce8c5; font-weight: bold; font-size: 15px; text-align: center; color: #d68b00;">多模态融合生成引擎</div>
+                     <div style="padding: 12px; font-size: 12px; color: #555; text-align: center; line-height: 1.8; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                         <div style="margin-bottom: 8px;">
+                             <b>文本:</b> GPT-5.4 / Claude / DeepSeek<br>
+                             <b>视觉:</b> Gemini / Veo 3.1 / CogVideoX
+                         </div>
+                         <div style="font-size: 11px; color: #888; border-top: 1px dashed #eee; padding-top: 5px;">
+                             并行生成矩阵 & 平台规范自适应裁剪
+                         </div>
+                     </div>
+                </div>
+
+                <div style="display: flex; align-items: center; font-size: 20px; color: #2b70c9;">&#11013;</div>
+
+                <div style="flex: 1; display: flex; flex-direction: column; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px; overflow: hidden;">
+                     <div style="background: #eef5ff; padding: 10px; border-bottom: 1px solid #b3d4ff; font-weight: bold; text-align: center; color: #1a569d; font-size: 14px;">品牌资产控制器</div>
+                     <div style="padding: 12px; font-size: 12px; color: #555; text-align: center; line-height: 1.6; flex: 1;">
+                         <span style="display:inline-block; margin-bottom:4px; padding: 2px 6px; background:#f0f2f5; border-radius:3px;">向量化卖点库</span>
+                         <span style="display:inline-block; margin-bottom:4px; padding: 2px 6px; background:#f0f2f5; border-radius:3px;">视觉风格矩阵</span><br>
+                         (RAG 检索增强)
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 24px; color: #e74c3c; margin-top: -30px; margin-bottom: 10px;">&#11015;</div>
+
+        <div style="display: flex; justify-content: space-between; gap: 20px;">
+            
+            <div style="flex: 1; border: 2px dashed #4a90e2; border-radius: 10px; padding: 30px 20px 20px 20px; position: relative; background: #f8fbff;">
+                <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #2b70c9; color: white; padding: 6px 24px; border-radius: 20px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 6px rgba(43,112,201,0.3); white-space: nowrap;">
+                    风控闸门与分发流
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px;">
+                        <div style="font-weight: bold; color: #1a569d; margin-bottom: 4px; font-size: 13px;">AI自动预评分与复核台</div>
+                        <div style="font-size: 11px; color: #666;">gpt-4o-mini 风控拦截 + 版本审计</div>
+                    </div>
+                    <div style="font-size: 18px; color: #2b70c9; transform: rotate(90deg);">&#10132;</div>
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px;">
+                        <div style="font-weight: bold; color: #1a569d; margin-bottom: 4px; font-size: 13px;">跨平台分发适配器</div>
+                        <div style="font-size: 11px; color: #666;">OpenClaw 自动化/API + 失败重试态</div>
+                    </div>
+                    <div style="font-size: 18px; color: #2b70c9; transform: rotate(90deg);">&#10132;</div>
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #e6f4ea; border: 1px solid #a3d9b2; border-radius: 6px; font-weight: bold; color: #137333; font-size: 13px;">
+                        社交矩阵上线发布
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="font-size: 28px; color: #e74c3c; font-weight: bold;">&#8644;</div>
+                <div style="font-size: 12px; color: #e74c3c; writing-mode: vertical-rl; letter-spacing: 2px; margin-top: 10px; font-weight: bold;">
+                    全链路数据飞轮闭环
+                </div>
+            </div>
+
+            <div style="flex: 1; border: 2px dashed #4a90e2; border-radius: 10px; padding: 30px 20px 20px 20px; position: relative; background: #f8fbff;">
+                <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: #2b70c9; color: white; padding: 6px 24px; border-radius: 20px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 6px rgba(43,112,201,0.3); white-space: nowrap;">
+                    数据回流与策略自进化
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px;">
+                        <div style="font-weight: bold; color: #1a569d; margin-bottom: 4px; font-size: 13px;">T+1 与小时级指标采集</div>
+                        <div style="font-size: 11px; color: #666;">曝光/互动映射至统一口径</div>
+                    </div>
+                    <div style="font-size: 18px; color: #2b70c9; transform: rotate(90deg);">&#10132;</div>
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #fffcf5; border: 1px solid #f6c06a; border-radius: 6px;">
+                        <div style="font-weight: bold; color: #d68b00; font-size: 13px;">[(MySQL 时序表现库)]</div>
+                    </div>
+                    <div style="font-size: 18px; color: #2b70c9; transform: rotate(90deg);">&#10132;</div>
+                    <div style="width: 85%; text-align: center; padding: 10px; background: #ffffff; border: 1px solid #b3d4ff; border-radius: 6px;">
+                        <div style="font-weight: bold; color: #1a569d; margin-bottom: 4px; font-size: 13px;">Agent 策略反哺模块</div>
+                        <div style="font-size: 11px; color: #666;">动态调节 Prompt / 路由降级 / 选词池</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

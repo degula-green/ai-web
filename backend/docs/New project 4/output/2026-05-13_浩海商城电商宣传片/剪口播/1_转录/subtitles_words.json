@@ -1,0 +1,1208 @@
+[
+  {
+    "text": "",
+    "start": 0,
+    "end": 0.2,
+    "isGap": true
+  },
+  {
+    "text": "皓",
+    "start": 0.2,
+    "end": 0.32,
+    "isGap": false
+  },
+  {
+    "text": "海",
+    "start": 0.32,
+    "end": 0.52,
+    "isGap": false
+  },
+  {
+    "text": "商",
+    "start": 0.52,
+    "end": 0.72,
+    "isGap": false
+  },
+  {
+    "text": "城",
+    "start": 0.72,
+    "end": 0.92,
+    "isGap": false
+  },
+  {
+    "text": "是",
+    "start": 0.92,
+    "end": 1.08,
+    "isGap": false
+  },
+  {
+    "text": "为",
+    "start": 1.08,
+    "end": 1.24,
+    "isGap": false
+  },
+  {
+    "text": "客",
+    "start": 1.28,
+    "end": 1.52,
+    "isGap": false
+  },
+  {
+    "text": "户",
+    "start": 1.52,
+    "end": 2.02,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 2.02,
+    "end": 2.4,
+    "isGap": true
+  },
+  {
+    "text": "会",
+    "start": 2.4,
+    "end": 2.64,
+    "isGap": false
+  },
+  {
+    "text": "员",
+    "start": 2.64,
+    "end": 2.88,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 2.88,
+    "end": 3.64,
+    "isGap": true
+  },
+  {
+    "text": "商",
+    "start": 3.64,
+    "end": 3.88,
+    "isGap": false
+  },
+  {
+    "text": "家",
+    "start": 3.88,
+    "end": 4.08,
+    "isGap": false
+  },
+  {
+    "text": "提",
+    "start": 4.08,
+    "end": 4.24,
+    "isGap": false
+  },
+  {
+    "text": "供",
+    "start": 4.24,
+    "end": 4.4,
+    "isGap": false
+  },
+  {
+    "text": "服",
+    "start": 4.44,
+    "end": 4.64,
+    "isGap": false
+  },
+  {
+    "text": "务",
+    "start": 4.64,
+    "end": 5.14,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 5.14,
+    "end": 5.36,
+    "isGap": true
+  },
+  {
+    "text": "让",
+    "start": 5.36,
+    "end": 5.56,
+    "isGap": false
+  },
+  {
+    "text": "您",
+    "start": 5.56,
+    "end": 5.72,
+    "isGap": false
+  },
+  {
+    "text": "省",
+    "start": 5.72,
+    "end": 5.92,
+    "isGap": false
+  },
+  {
+    "text": "时",
+    "start": 5.92,
+    "end": 6.24,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 6.24,
+    "end": 6.76,
+    "isGap": true
+  },
+  {
+    "text": "省",
+    "start": 6.76,
+    "end": 6.96,
+    "isGap": false
+  },
+  {
+    "text": "力",
+    "start": 6.96,
+    "end": 7.2,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 7.2,
+    "end": 7.72,
+    "isGap": true
+  },
+  {
+    "text": "省",
+    "start": 7.72,
+    "end": 7.92,
+    "isGap": false
+  },
+  {
+    "text": "钱",
+    "start": 7.96,
+    "end": 8.54,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 8.54,
+    "end": 8.92,
+    "isGap": true
+  },
+  {
+    "text": "享",
+    "start": 8.92,
+    "end": 9.12,
+    "isGap": false
+  },
+  {
+    "text": "受",
+    "start": 9.12,
+    "end": 9.32,
+    "isGap": false
+  },
+  {
+    "text": "更",
+    "start": 9.32,
+    "end": 9.48,
+    "isGap": false
+  },
+  {
+    "text": "好",
+    "start": 9.48,
+    "end": 9.68,
+    "isGap": false
+  },
+  {
+    "text": "更",
+    "start": 9.68,
+    "end": 9.84,
+    "isGap": false
+  },
+  {
+    "text": "安",
+    "start": 9.84,
+    "end": 10,
+    "isGap": false
+  },
+  {
+    "text": "全",
+    "start": 10,
+    "end": 10.16,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 10.16,
+    "end": 10.32,
+    "isGap": false
+  },
+  {
+    "text": "购",
+    "start": 10.32,
+    "end": 10.48,
+    "isGap": false
+  },
+  {
+    "text": "物",
+    "start": 10.48,
+    "end": 10.64,
+    "isGap": false
+  },
+  {
+    "text": "服",
+    "start": 10.64,
+    "end": 10.84,
+    "isGap": false
+  },
+  {
+    "text": "务",
+    "start": 10.84,
+    "end": 11.34,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 11.34,
+    "end": 11.6,
+    "isGap": true
+  },
+  {
+    "text": "搜",
+    "start": 11.6,
+    "end": 11.84,
+    "isGap": false
+  },
+  {
+    "text": "索",
+    "start": 11.84,
+    "end": 12.04,
+    "isGap": false
+  },
+  {
+    "text": "功",
+    "start": 12.08,
+    "end": 12.24,
+    "isGap": false
+  },
+  {
+    "text": "能",
+    "start": 12.24,
+    "end": 12.44,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 12.44,
+    "end": 12.96,
+    "isGap": true
+  },
+  {
+    "text": "简",
+    "start": 12.96,
+    "end": 13.16,
+    "isGap": false
+  },
+  {
+    "text": "化",
+    "start": 13.16,
+    "end": 13.32,
+    "isGap": false
+  },
+  {
+    "text": "产",
+    "start": 13.32,
+    "end": 13.52,
+    "isGap": false
+  },
+  {
+    "text": "品",
+    "start": 13.52,
+    "end": 13.68,
+    "isGap": false
+  },
+  {
+    "text": "搜",
+    "start": 13.72,
+    "end": 13.88,
+    "isGap": false
+  },
+  {
+    "text": "索",
+    "start": 13.88,
+    "end": 14.04,
+    "isGap": false
+  },
+  {
+    "text": "功",
+    "start": 14.08,
+    "end": 14.24,
+    "isGap": false
+  },
+  {
+    "text": "能",
+    "start": 14.24,
+    "end": 14.78,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 14.78,
+    "end": 15.36,
+    "isGap": true
+  },
+  {
+    "text": "提",
+    "start": 15.36,
+    "end": 15.48,
+    "isGap": false
+  },
+  {
+    "text": "供",
+    "start": 15.48,
+    "end": 15.68,
+    "isGap": false
+  },
+  {
+    "text": "最",
+    "start": 15.68,
+    "end": 15.88,
+    "isGap": false
+  },
+  {
+    "text": "精",
+    "start": 15.88,
+    "end": 16.08,
+    "isGap": false
+  },
+  {
+    "text": "准",
+    "start": 16.08,
+    "end": 16.24,
+    "isGap": false
+  },
+  {
+    "text": "购",
+    "start": 16.24,
+    "end": 16.4,
+    "isGap": false
+  },
+  {
+    "text": "物",
+    "start": 16.4,
+    "end": 16.56,
+    "isGap": false
+  },
+  {
+    "text": "体",
+    "start": 16.56,
+    "end": 16.76,
+    "isGap": false
+  },
+  {
+    "text": "验",
+    "start": 16.8,
+    "end": 17.3,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 17.3,
+    "end": 17.44,
+    "isGap": true
+  },
+  {
+    "text": "搭",
+    "start": 17.44,
+    "end": 17.64,
+    "isGap": false
+  },
+  {
+    "text": "配",
+    "start": 17.68,
+    "end": 17.8,
+    "isGap": false
+  },
+  {
+    "text": "功",
+    "start": 17.84,
+    "end": 18,
+    "isGap": false
+  },
+  {
+    "text": "能",
+    "start": 18,
+    "end": 18.24,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 18.24,
+    "end": 18.76,
+    "isGap": true
+  },
+  {
+    "text": "合",
+    "start": 18.76,
+    "end": 19,
+    "isGap": false
+  },
+  {
+    "text": "理",
+    "start": 19,
+    "end": 19.12,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 19.12,
+    "end": 19.28,
+    "isGap": false
+  },
+  {
+    "text": "搭",
+    "start": 19.28,
+    "end": 19.44,
+    "isGap": false
+  },
+  {
+    "text": "配",
+    "start": 19.48,
+    "end": 20.02,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 20.02,
+    "end": 20.2,
+    "isGap": true
+  },
+  {
+    "text": "根",
+    "start": 20.2,
+    "end": 20.4,
+    "isGap": false
+  },
+  {
+    "text": "据",
+    "start": 20.4,
+    "end": 20.56,
+    "isGap": false
+  },
+  {
+    "text": "消",
+    "start": 20.6,
+    "end": 20.8,
+    "isGap": false
+  },
+  {
+    "text": "费",
+    "start": 20.8,
+    "end": 20.92,
+    "isGap": false
+  },
+  {
+    "text": "者",
+    "start": 20.96,
+    "end": 21.08,
+    "isGap": false
+  },
+  {
+    "text": "挑",
+    "start": 21.12,
+    "end": 21.32,
+    "isGap": false
+  },
+  {
+    "text": "选",
+    "start": 21.36,
+    "end": 21.48,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 21.48,
+    "end": 21.64,
+    "isGap": false
+  },
+  {
+    "text": "商",
+    "start": 21.64,
+    "end": 21.8,
+    "isGap": false
+  },
+  {
+    "text": "品",
+    "start": 21.8,
+    "end": 21.96,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 21.96,
+    "end": 22.12,
+    "isGap": false
+  },
+  {
+    "text": "主",
+    "start": 22.12,
+    "end": 22.28,
+    "isGap": false
+  },
+  {
+    "text": "要",
+    "start": 22.28,
+    "end": 22.44,
+    "isGap": false
+  },
+  {
+    "text": "功",
+    "start": 22.48,
+    "end": 22.64,
+    "isGap": false
+  },
+  {
+    "text": "能",
+    "start": 22.64,
+    "end": 23.1,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 23.1,
+    "end": 23.92,
+    "isGap": true
+  },
+  {
+    "text": "挑",
+    "start": 23.92,
+    "end": 24,
+    "isGap": false
+  },
+  {
+    "text": "选",
+    "start": 24.04,
+    "end": 24.24,
+    "isGap": false
+  },
+  {
+    "text": "与",
+    "start": 24.24,
+    "end": 24.4,
+    "isGap": false
+  },
+  {
+    "text": "之",
+    "start": 24.4,
+    "end": 24.56,
+    "isGap": false
+  },
+  {
+    "text": "搭",
+    "start": 24.56,
+    "end": 24.72,
+    "isGap": false
+  },
+  {
+    "text": "配",
+    "start": 24.76,
+    "end": 24.92,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 24.92,
+    "end": 25.16,
+    "isGap": false
+  },
+  {
+    "text": "最",
+    "start": 25.16,
+    "end": 25.36,
+    "isGap": false
+  },
+  {
+    "text": "适",
+    "start": 25.36,
+    "end": 25.52,
+    "isGap": false
+  },
+  {
+    "text": "合",
+    "start": 25.52,
+    "end": 25.68,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 25.68,
+    "end": 25.84,
+    "isGap": false
+  },
+  {
+    "text": "商",
+    "start": 25.84,
+    "end": 26,
+    "isGap": false
+  },
+  {
+    "text": "品",
+    "start": 26,
+    "end": 26.54,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 26.54,
+    "end": 26.76,
+    "isGap": true
+  },
+  {
+    "text": "便",
+    "start": 26.76,
+    "end": 27,
+    "isGap": false
+  },
+  {
+    "text": "捷",
+    "start": 27,
+    "end": 27.12,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 27.12,
+    "end": 27.28,
+    "isGap": false
+  },
+  {
+    "text": "提",
+    "start": 27.28,
+    "end": 27.44,
+    "isGap": false
+  },
+  {
+    "text": "货",
+    "start": 27.48,
+    "end": 27.64,
+    "isGap": false
+  },
+  {
+    "text": "功",
+    "start": 27.64,
+    "end": 27.8,
+    "isGap": false
+  },
+  {
+    "text": "能",
+    "start": 27.8,
+    "end": 28.3,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 28.3,
+    "end": 28.56,
+    "isGap": true
+  },
+  {
+    "text": "支",
+    "start": 28.56,
+    "end": 28.76,
+    "isGap": false
+  },
+  {
+    "text": "付",
+    "start": 28.76,
+    "end": 28.88,
+    "isGap": false
+  },
+  {
+    "text": "完",
+    "start": 28.88,
+    "end": 29.08,
+    "isGap": false
+  },
+  {
+    "text": "成",
+    "start": 29.08,
+    "end": 29.28,
+    "isGap": false
+  },
+  {
+    "text": "后",
+    "start": 29.32,
+    "end": 29.56,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 29.56,
+    "end": 30.12,
+    "isGap": true
+  },
+  {
+    "text": "当",
+    "start": 30.12,
+    "end": 30.32,
+    "isGap": false
+  },
+  {
+    "text": "地",
+    "start": 30.32,
+    "end": 30.52,
+    "isGap": false
+  },
+  {
+    "text": "可",
+    "start": 30.52,
+    "end": 30.64,
+    "isGap": false
+  },
+  {
+    "text": "以",
+    "start": 30.64,
+    "end": 30.8,
+    "isGap": false
+  },
+  {
+    "text": "直",
+    "start": 30.8,
+    "end": 30.96,
+    "isGap": false
+  },
+  {
+    "text": "接",
+    "start": 30.96,
+    "end": 31.12,
+    "isGap": false
+  },
+  {
+    "text": "取",
+    "start": 31.12,
+    "end": 31.32,
+    "isGap": false
+  },
+  {
+    "text": "货",
+    "start": 31.32,
+    "end": 31.82,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 31.82,
+    "end": 32.04,
+    "isGap": true
+  },
+  {
+    "text": "浩",
+    "start": 32.04,
+    "end": 32.28,
+    "isGap": false
+  },
+  {
+    "text": "海",
+    "start": 32.28,
+    "end": 32.44,
+    "isGap": false
+  },
+  {
+    "text": "商",
+    "start": 32.48,
+    "end": 32.64,
+    "isGap": false
+  },
+  {
+    "text": "城",
+    "start": 32.64,
+    "end": 32.88,
+    "isGap": false
+  },
+  {
+    "text": "开",
+    "start": 32.96,
+    "end": 33.2,
+    "isGap": false
+  },
+  {
+    "text": "创",
+    "start": 33.2,
+    "end": 33.36,
+    "isGap": false
+  },
+  {
+    "text": "网",
+    "start": 33.36,
+    "end": 33.56,
+    "isGap": false
+  },
+  {
+    "text": "络",
+    "start": 33.56,
+    "end": 33.68,
+    "isGap": false
+  },
+  {
+    "text": "营",
+    "start": 33.72,
+    "end": 33.84,
+    "isGap": false
+  },
+  {
+    "text": "销",
+    "start": 33.84,
+    "end": 34.08,
+    "isGap": false
+  },
+  {
+    "text": "新",
+    "start": 34.08,
+    "end": 34.24,
+    "isGap": false
+  },
+  {
+    "text": "模",
+    "start": 34.24,
+    "end": 34.44,
+    "isGap": false
+  },
+  {
+    "text": "式",
+    "start": 34.44,
+    "end": 34.98,
+    "isGap": false
+  },
+  {
+    "text": "结",
+    "start": 35,
+    "end": 35.2,
+    "isGap": false
+  },
+  {
+    "text": "合",
+    "start": 35.2,
+    "end": 35.32,
+    "isGap": false
+  },
+  {
+    "text": "当",
+    "start": 35.32,
+    "end": 35.52,
+    "isGap": false
+  },
+  {
+    "text": "前",
+    "start": 35.56,
+    "end": 35.76,
+    "isGap": false
+  },
+  {
+    "text": "中",
+    "start": 35.8,
+    "end": 35.96,
+    "isGap": false
+  },
+  {
+    "text": "国",
+    "start": 35.96,
+    "end": 36.16,
+    "isGap": false
+  },
+  {
+    "text": "最",
+    "start": 36.16,
+    "end": 36.32,
+    "isGap": false
+  },
+  {
+    "text": "为",
+    "start": 36.32,
+    "end": 36.48,
+    "isGap": false
+  },
+  {
+    "text": "迅",
+    "start": 36.48,
+    "end": 36.68,
+    "isGap": false
+  },
+  {
+    "text": "速",
+    "start": 36.68,
+    "end": 36.84,
+    "isGap": false
+  },
+  {
+    "text": "发",
+    "start": 36.84,
+    "end": 37.04,
+    "isGap": false
+  },
+  {
+    "text": "展",
+    "start": 37.04,
+    "end": 37.2,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 37.2,
+    "end": 37.44,
+    "isGap": false
+  },
+  {
+    "text": "币",
+    "start": 37.48,
+    "end": 37.64,
+    "isGap": false
+  },
+  {
+    "text": "土",
+    "start": 37.68,
+    "end": 37.88,
+    "isGap": false
+  },
+  {
+    "text": "币",
+    "start": 37.88,
+    "end": 38.08,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 38.08,
+    "end": 38.56,
+    "isGap": true
+  },
+  {
+    "text": "地",
+    "start": 38.56,
+    "end": 38.6,
+    "isGap": false
+  },
+  {
+    "text": "土",
+    "start": 38.6,
+    "end": 38.76,
+    "isGap": false
+  },
+  {
+    "text": "塞",
+    "start": 38.84,
+    "end": 39.08,
+    "isGap": false
+  },
+  {
+    "text": "网",
+    "start": 39.16,
+    "end": 39.36,
+    "isGap": false
+  },
+  {
+    "text": "络",
+    "start": 39.36,
+    "end": 39.52,
+    "isGap": false
+  },
+  {
+    "text": "销",
+    "start": 39.56,
+    "end": 39.72,
+    "isGap": false
+  },
+  {
+    "text": "售",
+    "start": 39.72,
+    "end": 39.88,
+    "isGap": false
+  },
+  {
+    "text": "模",
+    "start": 39.88,
+    "end": 40.12,
+    "isGap": false
+  },
+  {
+    "text": "式",
+    "start": 40.12,
+    "end": 40.66,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 40.66,
+    "end": 41.24,
+    "isGap": true
+  },
+  {
+    "text": "致",
+    "start": 41.24,
+    "end": 41.44,
+    "isGap": false
+  },
+  {
+    "text": "力",
+    "start": 41.44,
+    "end": 41.56,
+    "isGap": false
+  },
+  {
+    "text": "于",
+    "start": 41.56,
+    "end": 41.72,
+    "isGap": false
+  },
+  {
+    "text": "通",
+    "start": 41.72,
+    "end": 41.92,
+    "isGap": false
+  },
+  {
+    "text": "过",
+    "start": 41.92,
+    "end": 42.16,
+    "isGap": false
+  },
+  {
+    "text": "先",
+    "start": 42.2,
+    "end": 42.4,
+    "isGap": false
+  },
+  {
+    "text": "进",
+    "start": 42.4,
+    "end": 42.52,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 42.52,
+    "end": 42.68,
+    "isGap": false
+  },
+  {
+    "text": "互",
+    "start": 42.68,
+    "end": 42.84,
+    "isGap": false
+  },
+  {
+    "text": "联",
+    "start": 42.84,
+    "end": 43,
+    "isGap": false
+  },
+  {
+    "text": "网",
+    "start": 43,
+    "end": 43.16,
+    "isGap": false
+  },
+  {
+    "text": "平",
+    "start": 43.2,
+    "end": 43.4,
+    "isGap": false
+  },
+  {
+    "text": "台",
+    "start": 43.4,
+    "end": 43.6,
+    "isGap": false
+  },
+  {
+    "text": "技",
+    "start": 43.6,
+    "end": 43.76,
+    "isGap": false
+  },
+  {
+    "text": "术",
+    "start": 43.76,
+    "end": 43.96,
+    "isGap": false
+  },
+  {
+    "text": "",
+    "start": 43.96,
+    "end": 44.24,
+    "isGap": true
+  },
+  {
+    "text": "消",
+    "start": 44.24,
+    "end": 44.48,
+    "isGap": false
+  },
+  {
+    "text": "费",
+    "start": 44.48,
+    "end": 44.64,
+    "isGap": false
+  },
+  {
+    "text": "于",
+    "start": 44.64,
+    "end": 44.8,
+    "isGap": false
+  },
+  {
+    "text": "一",
+    "start": 44.8,
+    "end": 44.96,
+    "isGap": false
+  },
+  {
+    "text": "体",
+    "start": 44.96,
+    "end": 45.12,
+    "isGap": false
+  },
+  {
+    "text": "的",
+    "start": 45.12,
+    "end": 45.32,
+    "isGap": false
+  },
+  {
+    "text": "综",
+    "start": 45.32,
+    "end": 45.52,
+    "isGap": false
+  },
+  {
+    "text": "合",
+    "start": 45.52,
+    "end": 45.68,
+    "isGap": false
+  },
+  {
+    "text": "性",
+    "start": 45.68,
+    "end": 45.88,
+    "isGap": false
+  },
+  {
+    "text": "服",
+    "start": 45.88,
+    "end": 46,
+    "isGap": false
+  },
+  {
+    "text": "务",
+    "start": 46,
+    "end": 46.12,
+    "isGap": false
+  },
+  {
+    "text": "平",
+    "start": 46.16,
+    "end": 46.36,
+    "isGap": false
+  },
+  {
+    "text": "台",
+    "start": 46.36,
+    "end": 46.9,
+    "isGap": false
+  }
+]
