@@ -1,0 +1,12 @@
+{
+    "platform": "dy",
+    "crawler_type": "search",
+    "keywords": "COS",
+    "config_overrides": {
+        "CRAWLER_MAX_NOTES_COUNT": 5,
+        "SHOW_LOGIN_QR_CODE": false
+    },
+    "env_overrides": {
+        "PYTHONPATH": "."
+    }
+}
