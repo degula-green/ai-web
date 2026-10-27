@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "MediaCrawler SignSrv API",
+    "description": "MediaCrawler 签名服务接口文档，用于处理各平台的反爬加密逻辑。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8989"
+    }
+  ],
+  "paths": {
+    "/signsrv/v1/douyin/sign": {
+      "post": {
+        "summary": "抖音签名接口",
+        "description": "对给定的 URL 及其参数进行抖音加密签名 (a_bogus)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "需要签名的完整 URL",
+                    "example": "https://www.douyin.com/aweme/v1/web/search/item/"
+                  },
+                  "ua": {
+                    "type": "string",
+                    "description": "浏览器 User-Agent",
+                    "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "请求方法",
+                    "default": "GET"
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signsrv/pong": {
+      "get": {
+        "summary": "健康检查",
+        "responses": {
+          "200": {
+            "description": "在线",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "pong"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

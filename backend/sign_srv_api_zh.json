@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "媒体爬虫签名服务 - 接口文档",
+    "description": "这是 MediaCrawler 专用签名服务的接口定义。支持抖音、小红书等平台的加密签名处理。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8989",
+      "description": "本地签名服务器"
+    }
+  ],
+  "paths": {
+    "/signsrv/v1/douyin/sign": {
+      "post": {
+        "summary": "抖音接口加密签名 (Sign)",
+        "description": "为抖音 API 请求生成必要的加密参数（如 a_bogus、_signature 等）。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "需要加密签名的完整请求 URL",
+                    "example": "https://www.douyin.com/aweme/v1/web/search/item/"
+                  },
+                  "ua": {
+                    "type": "string",
+                    "description": "浏览器的 User-Agent 字符串",
+                    "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36..."
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "接口请求方法 (GET/POST)",
+                    "default": "GET"
+                  }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "签名成功，返回加密后的参数字符串",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signsrv/pong": {
+      "get": {
+        "summary": "服务健康检查 (Ping)",
+        "description": "用于检测签名服务是否处于在线运行状态。",
+        "responses": {
+          "200": {
+            "description": "服务在线",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "pong"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
