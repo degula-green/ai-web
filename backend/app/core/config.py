@@ -361,8 +361,8 @@ def get_settings() -> Settings:
             provider="aliyun", # 强制使用真实短信
             sign_name="速通互联验证码", # 来源于 docs
             template_code="100001",
-            access_key_id="REDACTED_ALIYUN_ACCESS_KEY_ID",
-            access_key_secret="REDACTED_ALIYUN_ACCESS_KEY_SECRET",
+            access_key_id=_get_env("SMS_ACCESS_KEY_ID", "").strip(),
+            access_key_secret=_get_env("SMS_ACCESS_KEY_SECRET", "").strip(),
             endpoint="dypnsapi.aliyuncs.com",
         ),
         llm=LLMSettings(
