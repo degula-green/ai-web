@@ -1,0 +1,7 @@
+.playwright-mcp/
+
+# Docker
+.env
+temp/
+assets/
+!backend/assets/
