@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审核稿</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    h1 { text-align: center; margin: 10px 0; font-size: 20px; }
+
+    .toolbar {
+      background: #1a1a1a;
+      padding: 10px 20px;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover { background: #45a049; }
+    button.danger { background: #f44336; }
+    button.danger:hover { background: #da190b; }
+
+    select {
+      padding: 8px 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    select:hover { background: #444; }
+
+    #time {
+      font-family: monospace;
+      font-size: 16px;
+      color: #888;
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .left-panel {
+      width: 420px;
+      flex-shrink: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 1px solid #333;
+    }
+
+    #player {
+      width: 100%;
+      border-radius: 4px;
+      background: #000;
+    }
+
+    .help {
+      font-size: 12px;
+      color: #999;
+      background: #252525;
+      padding: 10px;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+    .help b { color: #fff; }
+    .help div { margin: 2px 0; }
+
+    .right-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px 20px;
+    }
+
+    .content {
+      line-height: 2.5;
+    }
+
+    .word {
+      display: inline-block;
+      padding: 4px 2px;
+      margin: 2px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .word:hover { background: #333; }
+    .word.current { background: #2196F3; color: white; }
+    .word.selected { background: #f44336; color: white; text-decoration: line-through; }
+    .word.ai-selected { background: #ff9800; color: white; }
+    .word.ai-selected.selected { background: #f44336; }
+
+    .gap {
+      display: inline-block;
+      background: #333;
+      color: #888;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 3px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .gap:hover { background: #444; }
+    .gap.selected { background: #f44336; color: white; }
+    .gap.ai-selected { background: #ff9800; color: white; }
+    .gap.ai-selected.selected { background: #f44336; }
+
+    .stats {
+      padding: 10px;
+      background: #252525;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* Loading 遮罩 */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .loading-overlay.show { display: flex; }
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #333;
+      border-top-color: #9C27B0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #fff;
+    }
+    .loading-progress-container {
+      margin-top: 20px;
+      width: 300px;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .loading-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #9C27B0, #E91E63);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .loading-time {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #888;
+    }
+    .loading-estimate {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading 遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">🎬 正在剪辑中...</div>
+    <div class="loading-progress-container">
+      <div class="loading-progress-bar" id="loadingProgress"></div>
+    </div>
+    <div class="loading-time" id="loadingTime">已等待 0 秒</div>
+    <div class="loading-estimate" id="loadingEstimate">预估剩余: 计算中...</div>
+  </div>
+
+  <div class="toolbar">
+    <div class="buttons">
+      <button onclick="togglePlay()">▶️ 播放/暂停</button>
+      <select id="speed" onchange="player.playbackRate=parseFloat(this.value)">
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+      <button onclick="copyDeleteList()">📋 复制删除列表</button>
+      <button onclick="executeCut()" style="background:#9C27B0">🎬 执行剪辑</button>
+      <button class="danger" onclick="clearAll()">🗑️ 清空选择</button>
+      <span id="time">00:00 / 00:00</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="left-panel">
+      <video id="player" src="video.mp4" preload="auto"></video>
+      <div class="stats" id="stats"></div>
+      <div class="help">
+        <div><b>🖱️ 鼠标：</b>单击跳转 | 双击选中 | Shift+拖动批量</div>
+        <div><b>⌨️ 键盘：</b>空格播放 | ←→跳1s | Shift+←→跳5s</div>
+        <div><b>🎨 颜色：</b><span style="color:#ff9800">橙色</span>AI预选 | <span style="color:#f44336">红色</span>确认删除</div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script>
+    const words = [{"text":"","start":0,"end":0.2,"isGap":true},{"text":"皓","start":0.2,"end":0.32,"isGap":false},{"text":"海","start":0.32,"end":0.52,"isGap":false},{"text":"商","start":0.52,"end":0.72,"isGap":false},{"text":"城","start":0.72,"end":0.92,"isGap":false},{"text":"是","start":0.92,"end":1.08,"isGap":false},{"text":"为","start":1.08,"end":1.24,"isGap":false},{"text":"客","start":1.28,"end":1.52,"isGap":false},{"text":"户","start":1.52,"end":2.02,"isGap":false},{"text":"","start":2.02,"end":2.4,"isGap":true},{"text":"会","start":2.4,"end":2.64,"isGap":false},{"text":"员","start":2.64,"end":2.88,"isGap":false},{"text":"","start":2.88,"end":3.64,"isGap":true},{"text":"商","start":3.64,"end":3.88,"isGap":false},{"text":"家","start":3.88,"end":4.08,"isGap":false},{"text":"提","start":4.08,"end":4.24,"isGap":false},{"text":"供","start":4.24,"end":4.4,"isGap":false},{"text":"服","start":4.44,"end":4.64,"isGap":false},{"text":"务","start":4.64,"end":5.14,"isGap":false},{"text":"","start":5.14,"end":5.36,"isGap":true},{"text":"让","start":5.36,"end":5.56,"isGap":false},{"text":"您","start":5.56,"end":5.72,"isGap":false},{"text":"省","start":5.72,"end":5.92,"isGap":false},{"text":"时","start":5.92,"end":6.24,"isGap":false},{"text":"","start":6.24,"end":6.76,"isGap":true},{"text":"省","start":6.76,"end":6.96,"isGap":false},{"text":"力","start":6.96,"end":7.2,"isGap":false},{"text":"","start":7.2,"end":7.72,"isGap":true},{"text":"省","start":7.72,"end":7.92,"isGap":false},{"text":"钱","start":7.96,"end":8.54,"isGap":false},{"text":"","start":8.54,"end":8.92,"isGap":true},{"text":"享","start":8.92,"end":9.12,"isGap":false},{"text":"受","start":9.12,"end":9.32,"isGap":false},{"text":"更","start":9.32,"end":9.48,"isGap":false},{"text":"好","start":9.48,"end":9.68,"isGap":false},{"text":"更","start":9.68,"end":9.84,"isGap":false},{"text":"安","start":9.84,"end":10,"isGap":false},{"text":"全","start":10,"end":10.16,"isGap":false},{"text":"的","start":10.16,"end":10.32,"isGap":false},{"text":"购","start":10.32,"end":10.48,"isGap":false},{"text":"物","start":10.48,"end":10.64,"isGap":false},{"text":"服","start":10.64,"end":10.84,"isGap":false},{"text":"务","start":10.84,"end":11.34,"isGap":false},{"text":"","start":11.34,"end":11.6,"isGap":true},{"text":"搜","start":11.6,"end":11.84,"isGap":false},{"text":"索","start":11.84,"end":12.04,"isGap":false},{"text":"功","start":12.08,"end":12.24,"isGap":false},{"text":"能","start":12.24,"end":12.44,"isGap":false},{"text":"","start":12.44,"end":12.96,"isGap":true},{"text":"简","start":12.96,"end":13.16,"isGap":false},{"text":"化","start":13.16,"end":13.32,"isGap":false},{"text":"产","start":13.32,"end":13.52,"isGap":false},{"text":"品","start":13.52,"end":13.68,"isGap":false},{"text":"搜","start":13.72,"end":13.88,"isGap":false},{"text":"索","start":13.88,"end":14.04,"isGap":false},{"text":"功","start":14.08,"end":14.24,"isGap":false},{"text":"能","start":14.24,"end":14.78,"isGap":false},{"text":"","start":14.78,"end":15.36,"isGap":true},{"text":"提","start":15.36,"end":15.48,"isGap":false},{"text":"供","start":15.48,"end":15.68,"isGap":false},{"text":"最","start":15.68,"end":15.88,"isGap":false},{"text":"精","start":15.88,"end":16.08,"isGap":false},{"text":"准","start":16.08,"end":16.24,"isGap":false},{"text":"购","start":16.24,"end":16.4,"isGap":false},{"text":"物","start":16.4,"end":16.56,"isGap":false},{"text":"体","start":16.56,"end":16.76,"isGap":false},{"text":"验","start":16.8,"end":17.3,"isGap":false},{"text":"","start":17.3,"end":17.44,"isGap":true},{"text":"搭","start":17.44,"end":17.64,"isGap":false},{"text":"配","start":17.68,"end":17.8,"isGap":false},{"text":"功","start":17.84,"end":18,"isGap":false},{"text":"能","start":18,"end":18.24,"isGap":false},{"text":"","start":18.24,"end":18.76,"isGap":true},{"text":"合","start":18.76,"end":19,"isGap":false},{"text":"理","start":19,"end":19.12,"isGap":false},{"text":"的","start":19.12,"end":19.28,"isGap":false},{"text":"搭","start":19.28,"end":19.44,"isGap":false},{"text":"配","start":19.48,"end":20.02,"isGap":false},{"text":"","start":20.02,"end":20.2,"isGap":true},{"text":"根","start":20.2,"end":20.4,"isGap":false},{"text":"据","start":20.4,"end":20.56,"isGap":false},{"text":"消","start":20.6,"end":20.8,"isGap":false},{"text":"费","start":20.8,"end":20.92,"isGap":false},{"text":"者","start":20.96,"end":21.08,"isGap":false},{"text":"挑","start":21.12,"end":21.32,"isGap":false},{"text":"选","start":21.36,"end":21.48,"isGap":false},{"text":"的","start":21.48,"end":21.64,"isGap":false},{"text":"商","start":21.64,"end":21.8,"isGap":false},{"text":"品","start":21.8,"end":21.96,"isGap":false},{"text":"的","start":21.96,"end":22.12,"isGap":false},{"text":"主","start":22.12,"end":22.28,"isGap":false},{"text":"要","start":22.28,"end":22.44,"isGap":false},{"text":"功","start":22.48,"end":22.64,"isGap":false},{"text":"能","start":22.64,"end":23.1,"isGap":false},{"text":"","start":23.1,"end":23.92,"isGap":true},{"text":"挑","start":23.92,"end":24,"isGap":false},{"text":"选","start":24.04,"end":24.24,"isGap":false},{"text":"与","start":24.24,"end":24.4,"isGap":false},{"text":"之","start":24.4,"end":24.56,"isGap":false},{"text":"搭","start":24.56,"end":24.72,"isGap":false},{"text":"配","start":24.76,"end":24.92,"isGap":false},{"text":"的","start":24.92,"end":25.16,"isGap":false},{"text":"最","start":25.16,"end":25.36,"isGap":false},{"text":"适","start":25.36,"end":25.52,"isGap":false},{"text":"合","start":25.52,"end":25.68,"isGap":false},{"text":"的","start":25.68,"end":25.84,"isGap":false},{"text":"商","start":25.84,"end":26,"isGap":false},{"text":"品","start":26,"end":26.54,"isGap":false},{"text":"","start":26.54,"end":26.76,"isGap":true},{"text":"便","start":26.76,"end":27,"isGap":false},{"text":"捷","start":27,"end":27.12,"isGap":false},{"text":"的","start":27.12,"end":27.28,"isGap":false},{"text":"提","start":27.28,"end":27.44,"isGap":false},{"text":"货","start":27.48,"end":27.64,"isGap":false},{"text":"功","start":27.64,"end":27.8,"isGap":false},{"text":"能","start":27.8,"end":28.3,"isGap":false},{"text":"","start":28.3,"end":28.56,"isGap":true},{"text":"支","start":28.56,"end":28.76,"isGap":false},{"text":"付","start":28.76,"end":28.88,"isGap":false},{"text":"完","start":28.88,"end":29.08,"isGap":false},{"text":"成","start":29.08,"end":29.28,"isGap":false},{"text":"后","start":29.32,"end":29.56,"isGap":false},{"text":"","start":29.56,"end":30.12,"isGap":true},{"text":"当","start":30.12,"end":30.32,"isGap":false},{"text":"地","start":30.32,"end":30.52,"isGap":false},{"text":"可","start":30.52,"end":30.64,"isGap":false},{"text":"以","start":30.64,"end":30.8,"isGap":false},{"text":"直","start":30.8,"end":30.96,"isGap":false},{"text":"接","start":30.96,"end":31.12,"isGap":false},{"text":"取","start":31.12,"end":31.32,"isGap":false},{"text":"货","start":31.32,"end":31.82,"isGap":false},{"text":"","start":31.82,"end":32.04,"isGap":true},{"text":"浩","start":32.04,"end":32.28,"isGap":false},{"text":"海","start":32.28,"end":32.44,"isGap":false},{"text":"商","start":32.48,"end":32.64,"isGap":false},{"text":"城","start":32.64,"end":32.88,"isGap":false},{"text":"开","start":32.96,"end":33.2,"isGap":false},{"text":"创","start":33.2,"end":33.36,"isGap":false},{"text":"网","start":33.36,"end":33.56,"isGap":false},{"text":"络","start":33.56,"end":33.68,"isGap":false},{"text":"营","start":33.72,"end":33.84,"isGap":false},{"text":"销","start":33.84,"end":34.08,"isGap":false},{"text":"新","start":34.08,"end":34.24,"isGap":false},{"text":"模","start":34.24,"end":34.44,"isGap":false},{"text":"式","start":34.44,"end":34.98,"isGap":false},{"text":"结","start":35,"end":35.2,"isGap":false},{"text":"合","start":35.2,"end":35.32,"isGap":false},{"text":"当","start":35.32,"end":35.52,"isGap":false},{"text":"前","start":35.56,"end":35.76,"isGap":false},{"text":"中","start":35.8,"end":35.96,"isGap":false},{"text":"国","start":35.96,"end":36.16,"isGap":false},{"text":"最","start":36.16,"end":36.32,"isGap":false},{"text":"为","start":36.32,"end":36.48,"isGap":false},{"text":"迅","start":36.48,"end":36.68,"isGap":false},{"text":"速","start":36.68,"end":36.84,"isGap":false},{"text":"发","start":36.84,"end":37.04,"isGap":false},{"text":"展","start":37.04,"end":37.2,"isGap":false},{"text":"的","start":37.2,"end":37.44,"isGap":false},{"text":"币","start":37.48,"end":37.64,"isGap":false},{"text":"土","start":37.68,"end":37.88,"isGap":false},{"text":"币","start":37.88,"end":38.08,"isGap":false},{"text":"","start":38.08,"end":38.56,"isGap":true},{"text":"地","start":38.56,"end":38.6,"isGap":false},{"text":"土","start":38.6,"end":38.76,"isGap":false},{"text":"塞","start":38.84,"end":39.08,"isGap":false},{"text":"网","start":39.16,"end":39.36,"isGap":false},{"text":"络","start":39.36,"end":39.52,"isGap":false},{"text":"销","start":39.56,"end":39.72,"isGap":false},{"text":"售","start":39.72,"end":39.88,"isGap":false},{"text":"模","start":39.88,"end":40.12,"isGap":false},{"text":"式","start":40.12,"end":40.66,"isGap":false},{"text":"","start":40.66,"end":41.24,"isGap":true},{"text":"致","start":41.24,"end":41.44,"isGap":false},{"text":"力","start":41.44,"end":41.56,"isGap":false},{"text":"于","start":41.56,"end":41.72,"isGap":false},{"text":"通","start":41.72,"end":41.92,"isGap":false},{"text":"过","start":41.92,"end":42.16,"isGap":false},{"text":"先","start":42.2,"end":42.4,"isGap":false},{"text":"进","start":42.4,"end":42.52,"isGap":false},{"text":"的","start":42.52,"end":42.68,"isGap":false},{"text":"互","start":42.68,"end":42.84,"isGap":false},{"text":"联","start":42.84,"end":43,"isGap":false},{"text":"网","start":43,"end":43.16,"isGap":false},{"text":"平","start":43.2,"end":43.4,"isGap":false},{"text":"台","start":43.4,"end":43.6,"isGap":false},{"text":"技","start":43.6,"end":43.76,"isGap":false},{"text":"术","start":43.76,"end":43.96,"isGap":false},{"text":"","start":43.96,"end":44.24,"isGap":true},{"text":"消","start":44.24,"end":44.48,"isGap":false},{"text":"费","start":44.48,"end":44.64,"isGap":false},{"text":"于","start":44.64,"end":44.8,"isGap":false},{"text":"一","start":44.8,"end":44.96,"isGap":false},{"text":"体","start":44.96,"end":45.12,"isGap":false},{"text":"的","start":45.12,"end":45.32,"isGap":false},{"text":"综","start":45.32,"end":45.52,"isGap":false},{"text":"合","start":45.52,"end":45.68,"isGap":false},{"text":"性","start":45.68,"end":45.88,"isGap":false},{"text":"服","start":45.88,"end":46,"isGap":false},{"text":"务","start":46,"end":46.12,"isGap":false},{"text":"平","start":46.16,"end":46.36,"isGap":false},{"text":"台","start":46.36,"end":46.9,"isGap":false}];
+    const autoSelected = new Set([0,9,12,19,24,27,30,43,48,57,72,94,108,116,122,131,161,171,187]);
+    const selected = new Set(autoSelected);
+
+    const player = document.getElementById('player');
+    const timeDisplay = document.getElementById('time');
+
+    function togglePlay() {
+      if (player.paused) player.play();
+      else player.pause();
+    }
+    const content = document.getElementById('content');
+    const statsDiv = document.getElementById('stats');
+    let elements = [];
+    let isSelecting = false;
+    let selectStart = -1;
+    let selectMode = 'add'; // 'add' or 'remove'
+
+    // 格式化时间 (用于播放器显示)
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // 格式化时长 (用于剪辑结果显示，带秒数)
+    function formatDuration(sec) {
+      const totalSec = parseFloat(sec);
+      const m = Math.floor(totalSec / 60);
+      const s = (totalSec % 60).toFixed(1);
+      if (m > 0) {
+        return `${m}分${s}秒 (${totalSec}s)`;
+      }
+      return `${s}秒`;
+    }
+
+    // 渲染内容
+    function render() {
+      content.innerHTML = '';
+      elements = [];
+
+      words.forEach((word, i) => {
+        const div = document.createElement('div');
+        div.className = word.isGap ? 'gap' : 'word';
+
+        if (selected.has(i)) div.classList.add('selected');
+        else if (autoSelected.has(i)) div.classList.add('ai-selected');
+
+        if (word.isGap) {
+          const duration = (word.end - word.start).toFixed(1);
+          div.textContent = `⏸ ${duration}s`;
+        } else {
+          div.textContent = word.text;
+        }
+
+        div.dataset.index = i;
+
+        // 单击跳转播放
+        div.onclick = (e) => {
+          if (!isSelecting) {
+            player.currentTime = word.start;
+          }
+        };
+
+        // 双击选中/取消
+        div.ondblclick = () => toggle(i);
+
+        // Shift+拖动选择/取消
+        div.onmousedown = (e) => {
+          if (e.shiftKey) {
+            isSelecting = true;
+            selectStart = i;
+            selectMode = selected.has(i) ? 'remove' : 'add';
+            e.preventDefault();
+          }
+        };
+
+        content.appendChild(div);
+        elements.push(div);
+      });
+
+      updateStats();
+    }
+
+    // Shift+拖动多选/取消
+    content.addEventListener('mousemove', e => {
+      if (!isSelecting) return;
+      const target = e.target.closest('[data-index]');
+      if (!target) return;
+
+      const i = parseInt(target.dataset.index);
+      const min = Math.min(selectStart, i);
+      const max = Math.max(selectStart, i);
+
+      for (let j = min; j <= max; j++) {
+        if (selectMode === 'add') {
+          selected.add(j);
+          elements[j].classList.add('selected');
+          elements[j].classList.remove('ai-selected');
+        } else {
+          selected.delete(j);
+          elements[j].classList.remove('selected');
+          if (autoSelected.has(j)) elements[j].classList.add('ai-selected');
+        }
+      }
+      updateStats();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isSelecting) rebuildSkipIntervals();
+      isSelecting = false;
+    });
+
+    function toggle(i) {
+      if (selected.has(i)) {
+        selected.delete(i);
+        elements[i].classList.remove('selected');
+        if (autoSelected.has(i)) elements[i].classList.add('ai-selected');
+      } else {
+        selected.add(i);
+        elements[i].classList.add('selected');
+        elements[i].classList.remove('ai-selected');
+      }
+      rebuildSkipIntervals();
+      updateStats();
+    }
+
+    function updateStats() {
+      const count = selected.size;
+      let totalDuration = 0;
+      selected.forEach(i => {
+        totalDuration += words[i].end - words[i].start;
+      });
+      statsDiv.textContent = `已选择 ${count} 个元素，总时长 ${totalDuration.toFixed(2)}s`;
+    }
+
+    // Web Audio API：采样级精度静音（~3ms vs player.muted 的 ~50ms）
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(player);
+    const gainNode = audioCtx.createGain();
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    player.addEventListener('play', () => { if (audioCtx.state === 'suspended') audioCtx.resume(); });
+
+    // 预计算跳过区间（selected 变化时重建）
+    let skipIntervals = [];
+    function rebuildSkipIntervals() {
+      const sorted = Array.from(selected).sort((a, b) => a - b);
+      skipIntervals = [];
+      let i = 0;
+      while (i < sorted.length) {
+        let start = words[sorted[i]].start;
+        let end = words[sorted[i]].end;
+        let j = i + 1;
+        while (j < sorted.length && words[sorted[j]].start - end < 0.1) {
+          end = words[sorted[j]].end;
+          j++;
+        }
+        skipIntervals.push({ start: start - 0.05, end });
+        i = j;
+      }
+    }
+    rebuildSkipIntervals();
+
+    // rAF 高频轮询 + Web Audio API 采样级静音
+    let lastHighlight = -1;
+    let skipLock = false;
+    function tick() {
+      requestAnimationFrame(tick);
+      const t = player.currentTime;
+
+      if (!player.paused) {
+        for (const iv of skipIntervals) {
+          if (t >= iv.start && t < iv.end) {
+            if (!skipLock) {
+              skipLock = true;
+              gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+              player.currentTime = iv.end;
+            }
+            return;
+          }
+        }
+        if (skipLock) {
+          skipLock = false;
+          gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+        }
+      }
+
+      timeDisplay.textContent = `${formatTime(t)} / ${formatTime(player.duration || 0)}`;
+
+      // 高亮当前词（用二分查找提速）
+      let curr = -1;
+      for (let i = 0; i < words.length; i++) {
+        if (t >= words[i].start && t < words[i].end) { curr = i; break; }
+      }
+      if (curr !== lastHighlight) {
+        if (lastHighlight >= 0 && lastHighlight < elements.length) elements[lastHighlight].classList.remove('current');
+        if (curr >= 0) {
+          elements[curr].classList.add('current');
+          elements[curr].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        lastHighlight = curr;
+      }
+    }
+    requestAnimationFrame(tick);
+
+    function copyDeleteList() {
+      const segments = [];
+      const sortedSelected = Array.from(selected).sort((a, b) => a - b);
+
+      sortedSelected.forEach(i => {
+        const word = words[i];
+        segments.push({ start: word.start, end: word.end });
+      });
+
+      // 合并相邻片段
+      const merged = [];
+      for (const seg of segments) {
+        if (merged.length === 0) {
+          merged.push({ ...seg });
+        } else {
+          const last = merged[merged.length - 1];
+          if (Math.abs(seg.start - last.end) < 0.05) {
+            last.end = seg.end;
+          } else {
+            merged.push({ ...seg });
+          }
+        }
+      }
+
+      const json = JSON.stringify(merged, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        alert('已复制 ' + merged.length + ' 个删除片段到剪贴板');
+      });
+    }
+
+    function clearAll() {
+      selected.clear();
+      elements.forEach((el, i) => {
+        el.classList.remove('selected');
+        if (autoSelected.has(i)) el.classList.add('ai-selected');
+      });
+      rebuildSkipIntervals();
+      updateStats();
+    }
+
+    async function executeCut() {
+      // 基于视频时长预估剪辑时间
+      const videoDuration = player.duration;
+      const videoMinutes = (videoDuration / 60).toFixed(1);
+      const estimatedTime = Math.max(5, Math.ceil(videoDuration / 4)); // 经验值：约4倍速处理
+      const estMin = Math.floor(estimatedTime / 60);
+      const estSec = estimatedTime % 60;
+      const estText = estMin > 0 ? `${estMin}分${estSec}秒` : `${estSec}秒`;
+
+      if (!confirm(`确认执行剪辑？\n\n📹 视频时长: ${videoMinutes} 分钟\n⏱️ 预计耗时: ${estText}\n\n点击确定开始`)) return;
+
+      // 直接发送原始时间戳，不做合并（和预览一致）
+      const segments = [];
+      const sortedSelected = Array.from(selected).sort((a, b) => a - b);
+      sortedSelected.forEach(i => {
+        const word = words[i];
+        segments.push({ start: word.start, end: word.end });
+      });
+
+      // 显示 loading 并开始计时
+      const overlay = document.getElementById('loadingOverlay');
+      const loadingTimeEl = document.getElementById('loadingTime');
+      const loadingProgress = document.getElementById('loadingProgress');
+      const loadingEstimate = document.getElementById('loadingEstimate');
+      overlay.classList.add('show');
+      loadingEstimate.textContent = `预估剩余: ${estText}`;
+
+      const startTime = Date.now();
+      const timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        loadingTimeEl.textContent = `已等待 ${elapsed} 秒`;
+
+        // 更新进度条（预估进度，最多到95%等待完成）
+        const progress = Math.min(95, (elapsed / estimatedTime) * 100);
+        loadingProgress.style.width = progress + '%';
+
+        // 更新预估剩余时间
+        const remaining = Math.max(0, estimatedTime - elapsed);
+        if (remaining > 0) {
+          loadingEstimate.textContent = `预估剩余: ${remaining} 秒`;
+        } else {
+          loadingEstimate.textContent = `即将完成...`;
+        }
+      }, 500);
+
+      try {
+        const res = await fetch('/api/cut', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(segments)  // 直接发原始数据
+        });
+        const data = await res.json();
+
+        // 停止计时并隐藏 loading
+        clearInterval(timer);
+        loadingProgress.style.width = '100%';
+        await new Promise(r => setTimeout(r, 300)); // 让进度条动画完成
+        overlay.classList.remove('show');
+        loadingProgress.style.width = '0%'; // 重置
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+        if (data.success) {
+          const msg = `✅ 剪辑完成！(耗时 ${totalTime}s)
+
+📁 输出文件: ${data.output}
+
+⏱️ 时间统计:
+   原时长: ${formatDuration(data.originalDuration)}
+   新时长: ${formatDuration(data.newDuration)}
+   删减: ${formatDuration(data.deletedDuration)} (${data.savedPercent}%)`;
+          alert(msg);
+        } else {
+          alert('❌ 剪辑失败: ' + data.error);
+        }
+      } catch (err) {
+        clearInterval(timer);
+        overlay.classList.remove('show');
+        loadingProgress.style.width = '0%'; // 重置
+        alert('❌ 请求失败: ' + err.message + '\n\n请确保使用 review_server.js 启动服务');
+      }
+    }
+
+    // 键盘快捷键
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowLeft') {
+        player.currentTime = Math.max(0, player.currentTime - (e.shiftKey ? 5 : 1));
+      } else if (e.code === 'ArrowRight') {
+        player.currentTime = player.currentTime + (e.shiftKey ? 5 : 1);
+      }
+    });
+
+    window.__executeReviewCut = function () {
+      return executeCut();
+    };
+
+    render();
+  </script>
+</body>
+</html>

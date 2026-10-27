@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>数据看板 - 全渠道数据闭环仪表盘</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb",
+                        "primary-light": "#eff6ff",
+                        "primary-dark": "#1e40af",
+                        "secondary": "#475569",
+                        "surface": "#ffffff",
+                        "surface-highlight": "#f1f5f9",
+                        "surface-accent": "#e2e8f0",
+                        "text-primary": "#1e293b",
+                        "text-secondary": "#64748b",
+                        "accent-success": "#10b981",
+                        "accent-warning": "#f59e0b",
+                        "accent-danger": "#ef4444",
+                        "background-light": "#f8fafc",
+                        "background-sidebar": "#f0f9ff",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans SC", "sans-serif"],
+                        "sans": ["Noto Sans SC", "sans-serif"],
+                    },
+                    boxShadow: {
+                        "card": "0 2px 10px -2px rgba(148, 163, 184, 0.15), 0 1px 4px -1px rgba(148, 163, 184, 0.05)",
+                        "card-hover": "0 10px 25px -5px rgba(148, 163, 184, 0.15), 0 5px 10px -5px rgba(148, 163, 184, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+        }
+
+        .font-display {
+            font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-text-primary min-h-screen flex flex-col">
+    <main class="flex flex-1 bg-background-light">
+        <div class="flex-1 flex flex-col p-6 gap-6">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 font-display">全渠道数据概览</h1>
+                    <p class="text-slate-500 text-sm mt-1">实时监控您的 AI 生成内容在各大平台的表现与转化效果。</p>
+                </div>
+                <div class="flex gap-3">
+                    <button
+                        class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all shadow-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        近 7 天
+                    </button>
+                    <button
+                        class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-primary/30 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        新建推广
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">account_tree</span>
+                        <h2 class="text-sm font-bold text-slate-700">内容生产流水线</h2>
+                        <span class="text-xs text-slate-400">— 实时追踪每条内容的生命周期状态</span>
+                    </div>
+                    <button class="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">open_in_new</span> 查看全部
+                    </button>
+                </div>
+                <div class="grid grid-cols-4 gap-0 rounded-xl overflow-hidden border border-slate-200">
+                    <div
+                        class="p-4 border-r border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span
+                                class="w-5 h-5 rounded-full bg-slate-300 text-slate-600 text-[10px] font-bold flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">1</span>
+                            <span class="text-xs font-semibold text-slate-500">AI 生产中</span>
+                            <span class="ml-auto flex gap-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary/50 animate-pulse"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary/30 animate-pulse"
+                                    style="animation-delay:.2s"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary/20 animate-pulse"
+                                    style="animation-delay:.4s"></span>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-slate-800 font-display">3</p>
+                        <p class="text-xs text-slate-400 mt-0.5">条内容生产中</p>
+                    </div>
+                    <div
+                        class="p-4 border-r border-slate-200 bg-amber-50 hover:bg-amber-100/60 transition-colors cursor-pointer relative">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span
+                                class="w-5 h-5 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+                            <span class="text-xs font-semibold text-amber-700">待审核</span>
+                            <span
+                                class="ml-auto bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">紧急</span>
+                        </div>
+                        <p class="text-3xl font-bold text-slate-800 font-display">12</p>
+                        <p class="text-xs text-amber-600 mt-0.5">条等待审核 · 最长 2h</p>
+                    </div>
+                    <div
+                        class="p-4 border-r border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span
+                                class="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">3</span>
+                            <span class="text-xs font-semibold text-slate-500">待发布</span>
+                        </div>
+                        <p class="text-3xl font-bold text-slate-800 font-display">5</p>
+                        <p class="text-xs text-slate-400 mt-0.5">条已排期 · 今日 2 条</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span
+                                class="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">✓</span>
+                            <span class="text-xs font-semibold text-slate-500">已发布</span>
+                        </div>
+                        <p class="text-3xl font-bold text-slate-800 font-display">68</p>
+                        <p class="text-xs text-slate-400 mt-0.5">本月累计 · +18 较上月</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div
+                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-5xl text-primary">visibility</span>
+                    </div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">总浏览量 (Total Views)</p>
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <h3 class="text-3xl font-bold text-slate-800 font-display tracking-tight">1,245,890</h3>
+                        <span
+                            class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded flex items-center">
+                            <span class="material-symbols-outlined text-[12px] mr-0.5">trending_up</span> 12.5%
+                        </span>
+                    </div>
+                    <div class="h-10 w-full flex items-end gap-1.5">
+                        <div class="w-1/6 bg-blue-100 h-[40%] rounded-sm"></div>
+                        <div class="w-1/6 bg-blue-200 h-[60%] rounded-sm"></div>
+                        <div class="w-1/6 bg-blue-300 h-[50%] rounded-sm"></div>
+                        <div class="w-1/6 bg-blue-400 h-[70%] rounded-sm"></div>
+                        <div class="w-1/6 bg-blue-500 h-[90%] rounded-sm"></div>
+                        <div class="w-1/6 bg-blue-600 h-[85%] rounded-sm"></div>
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-card hover:shadow-card-hover hover:border-cyan-400/30 transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-5xl text-cyan-500">touch_app</span>
+                    </div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">点击率 (CTR)</p>
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <h3 class="text-3xl font-bold text-slate-800 font-display tracking-tight">4.8%</h3>
+                        <span
+                            class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded flex items-center">
+                            <span class="material-symbols-outlined text-[12px] mr-0.5">trending_up</span> 0.4%
+                        </span>
+                    </div>
+                    <div class="h-10 w-full flex items-end gap-1.5">
+                        <div class="w-1/6 bg-cyan-100 h-[30%] rounded-sm"></div>
+                        <div class="w-1/6 bg-cyan-200 h-[40%] rounded-sm"></div>
+                        <div class="w-1/6 bg-cyan-300 h-[35%] rounded-sm"></div>
+                        <div class="w-1/6 bg-cyan-400 h-[50%] rounded-sm"></div>
+                        <div class="w-1/6 bg-cyan-500 h-[60%] rounded-sm"></div>
+                        <div class="w-1/6 bg-cyan-600 h-[65%] rounded-sm"></div>
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-card hover:shadow-card-hover hover:border-violet-400/30 transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-5xl text-violet-500">shopping_cart</span>
+                    </div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">转化率 (Conversion)</p>
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <h3 class="text-3xl font-bold text-slate-800 font-display tracking-tight">2.1%</h3>
+                        <span
+                            class="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded flex items-center">
+                            <span class="material-symbols-outlined text-[12px] mr-0.5">trending_flat</span> 0.1%
+                        </span>
+                    </div>
+                    <div class="h-10 w-full flex items-end gap-1.5">
+                        <div class="w-1/6 bg-violet-100 h-[60%] rounded-sm"></div>
+                        <div class="w-1/6 bg-violet-200 h-[55%] rounded-sm"></div>
+                        <div class="w-1/6 bg-violet-300 h-[58%] rounded-sm"></div>
+                        <div class="w-1/6 bg-violet-400 h-[52%] rounded-sm"></div>
+                        <div class="w-1/6 bg-violet-500 h-[50%] rounded-sm"></div>
+                        <div class="w-1/6 bg-violet-600 h-[48%] rounded-sm"></div>
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-card hover:shadow-card-hover hover:border-emerald-400/30 transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-5xl text-emerald-500">monetization_on</span>
+                    </div>
+                    <p class="text-slate-500 text-sm font-medium mb-1">投资回报率 (ROI)</p>
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <h3 class="text-3xl font-bold text-slate-800 font-display tracking-tight">350%</h3>
+                        <span
+                            class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded flex items-center">
+                            <span class="material-symbols-outlined text-[12px] mr-0.5">trending_up</span> 15%
+                        </span>
+                    </div>
+                    <div class="h-10 w-full flex items-end gap-1.5">
+                        <div class="w-1/6 bg-emerald-100 h-[40%] rounded-sm"></div>
+                        <div class="w-1/6 bg-emerald-200 h-[50%] rounded-sm"></div>
+                        <div class="w-1/6 bg-emerald-300 h-[60%] rounded-sm"></div>
+                        <div class="w-1/6 bg-emerald-400 h-[70%] rounded-sm"></div>
+                        <div class="w-1/6 bg-emerald-500 h-[80%] rounded-sm"></div>
+                        <div class="w-1/6 bg-emerald-600 h-[90%] rounded-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-gradient-to-r from-blue-50 to-indigo-50/50 rounded-xl p-6 shadow-sm border border-blue-100 relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-primary/10 transition-colors">
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div class="flex gap-4 items-start">
+                        <div
+                            class="p-3 bg-white/60 rounded-lg text-primary border border-primary/10 backdrop-blur-sm shadow-sm">
+                            <span class="material-symbols-outlined text-3xl">sync_alt</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 font-display tracking-wide">策略同步 (Strategy Sync)
+                            </h3>
+                            <p class="text-slate-600 text-sm mt-1 max-w-xl leading-relaxed">基于实时数据反馈，系统正在自动更新 Planner
+                                Agent 的参数。下一轮内容生成将侧重于提高完播率。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-8 w-full md:w-auto">
+                        <div class="flex flex-col gap-1 min-w-[120px]">
+                            <span class="text-xs text-slate-500 uppercase font-semibold tracking-wider">同步状态</span>
+                            <div class="flex items-center gap-2 text-emerald-600 text-sm font-bold">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
+                                进行中...
+                            </div>
+                        </div>
+                        <div class="h-10 w-px bg-slate-200"></div>
+                        <div class="flex flex-col gap-1 min-w-[120px]">
+                            <span class="text-xs text-slate-500 uppercase font-semibold tracking-wider">优化目标</span>
+                            <div class="text-slate-800 text-sm font-bold">完播率 > 45%</div>
+                        </div>
+                        <button
+                            class="ml-auto md:ml-0 px-4 py-2 bg-white text-primary border border-primary/20 hover:bg-primary/5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                            查看详情
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside
+            class="w-80 border-l border-slate-200 bg-background-sidebar flex flex-col overflow-hidden hidden xl:flex shadow-sm">
+            <div class="p-5 border-b border-blue-100 bg-blue-50/50">
+                <div class="flex items-center gap-3 mb-1">
+                    <div
+                        class="size-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-200">
+                        <span class="material-symbols-outlined text-white text-lg">smart_toy</span>
+                    </div>
+                    <h2 class="text-base font-bold text-slate-900 font-display">整体建议</h2>
+                </div>
+                <p class="text-xs text-slate-500 pl-11">基于数据为您提供实时优化建议</p>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div
+                    class="flex items-center gap-3 p-3 rounded-lg border-l-[3px] border-l-red-400 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="material-symbols-outlined text-red-400 text-[16px] shrink-0">trending_down</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800">图文完播率低于基准 40%</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">减少图文频次，优先投入视频内容</p>
+                    </div>
+                    <button
+                        class="shrink-0 text-[11px] font-semibold text-primary hover:underline whitespace-nowrap">执行</button>
+                </div>
+                <div
+                    class="flex items-center gap-3 p-3 rounded-lg border-l-[3px] border-l-emerald-400 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="material-symbols-outlined text-emerald-500 text-[16px] shrink-0">auto_graph</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800">视频号互动率 +28%</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">AI 建议生成同类题材内容</p>
+                    </div>
+                    <button
+                        class="shrink-0 text-[11px] font-semibold text-primary hover:underline whitespace-nowrap">生成</button>
+                </div>
+                <div
+                    class="flex items-center gap-3 p-3 rounded-lg border-l-[3px] border-l-amber-400 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="material-symbols-outlined text-amber-500 text-[16px] shrink-0">schedule</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800">2 条内容等待审核 3 小时+</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">积压影响最佳发布窗口期</p>
+                    </div>
+                    <button
+                        class="shrink-0 text-[11px] font-semibold text-primary hover:underline whitespace-nowrap">审核</button>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-white">
+                <div class="relative">
+                    <input
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-4 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-inner"
+                        placeholder="向 AI 助手提问数据..." type="text" />
+                    <button
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary-dark transition-colors p-1.5 bg-white rounded-lg shadow-sm border border-slate-100 hover:bg-blue-50">
+                        <span class="material-symbols-outlined text-[18px]">send</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </main>
+</body>
+
+</html>

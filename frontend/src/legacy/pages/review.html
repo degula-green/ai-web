@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI Content Auto - Content Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "primary-light": "#eef6ff",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "border-color": "#e2e8f0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans SC", "sans-serif"],
+                        "body": ["Inter", "Noto Sans SC", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-slate-900 font-display overflow-hidden h-screen flex">
+    <!-- Sidebar -->
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <!-- Header / Tabs -->
+        <header class="bg-white border-b border-border-color shrink-0 px-6 pt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-slate-900">内容审核与资产管理库</h2>
+                <div class="flex gap-2">
+                    <button
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                    </button>
+                    <button
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <span class="material-symbols-outlined text-[20px]">settings</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex gap-8">
+                <button id="tab-pending" onclick="switchTab('pending')"
+                    class="flex flex-col items-center justify-center border-b-[3px] border-primary pb-3 px-1 transition-colors">
+                    <div class="flex items-center gap-2 text-primary" id="tab-pending-text">
+                        <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+                        <span class="text-sm font-bold">待办审核 (Pending Review)</span>
+                        <span class="bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded-full">4</span>
+                    </div>
+                </button>
+                <button id="tab-archive" onclick="switchTab('archive')"
+                    class="flex flex-col items-center justify-center border-b-[3px] border-transparent pb-3 px-1 hover:border-slate-300 transition-colors">
+                    <div class="flex items-center gap-2 text-slate-500" id="tab-archive-text">
+                        <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                        <span class="text-sm font-medium">资产沉淀 (Asset Archive)</span>
+                    </div>
+                </button>
+            </div>
+        </header>
+        <!-- Pending Review View -->
+        <div id="view-pending" class="flex flex-1 overflow-hidden">
+            <!-- Left Column: Queue List -->
+            <div class="w-80 bg-white border-r border-border-color flex flex-col shrink-0">
+                <div class="p-4 border-b border-border-color bg-slate-50">
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">search</span>
+                        <input
+                            class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            placeholder="搜索任务 ID 或标题..." type="text" />
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button
+                            class="text-xs font-medium px-2 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300">全部</button>
+                        <button
+                            class="text-xs font-medium px-2 py-1 bg-white border border-slate-200 text-slate-600 rounded hover:bg-slate-50">高风险</button>
+                        <button
+                            class="text-xs font-medium px-2 py-1 bg-white border border-slate-200 text-slate-600 rounded hover:bg-slate-50">待排期</button>
+                    </div>
+                </div>
+                <div class="overflow-y-auto flex-1 p-2 space-y-2 no-scrollbar">
+                    <!-- Card 1 (Active) -->
+                    <div
+                        class="p-3 rounded-lg border-l-4 border-primary bg-primary-light/40 cursor-pointer hover:bg-primary-light/60 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-bold uppercase text-primary bg-white px-1.5 py-0.5 rounded border border-primary/20">V3</span>
+                            <span class="text-[10px] text-slate-400">刚刚</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 mb-1 line-clamp-2">新品发布种草视频 - 夏季特别版</h4>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div
+                                class="flex items-center gap-1 text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded text-xs font-medium border border-orange-100">
+                                <span class="material-symbols-outlined text-[14px]">warning</span>
+                                <span>72/100</span>
+                            </div>
+                            <span class="text-xs text-slate-500">Agent Flagged</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <img alt="Thumbnail" class="w-16 h-16 object-cover rounded bg-slate-200"
+                                data-alt="Small thumbnail preview of cosmetic product"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ_PVehQlXRi48A-IZz5TPmegwoqHMNENa0TouByDVBhCGnHkFfT5R-HTFlG3pioTLnJfl3DJQ5KUmVznUr_WFxjeYkdQrAybiqQA1iuVdzzS3a-8gtivfiXJl_YmWxgC7MXCaGHHHCWdmuz5dFzB06IDENHGVvSQwPzPz5Q7izzTeXJg1mnecOnp_Wwe30qs9cb5jnsH7lkU09h1qI9xANEOu8AUl-cKvh2gJMJwMVsdL2ZUiYBqw9UsoRe7_cxVUg6lS99PH9zo" />
+                            <div class="flex flex-col gap-1 justify-center">
+                                <span
+                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600 border border-red-100 w-fit">敏感词风险</span>
+                                <span
+                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-50 text-yellow-700 border border-yellow-100 w-fit">调性偏离</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div
+                        class="p-3 rounded-lg border border-transparent bg-white hover:bg-slate-50 hover:shadow-sm cursor-pointer transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">V1</span>
+                            <span class="text-[10px] text-slate-400">2h ago</span>
+                        </div>
+                        <h4 class="text-sm font-medium text-slate-700 mb-1 line-clamp-2">秋季大促预热 - 口红系列</h4>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div
+                                class="flex items-center gap-1 text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded text-xs font-medium border border-yellow-100">
+                                <span class="material-symbols-outlined text-[14px]">warning</span>
+                                <span>85/100</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <img alt="Thumbnail" class="w-16 h-16 object-cover rounded bg-slate-200"
+                                data-alt="Small thumbnail preview of lipstick"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuzIB6STJwnmOU0_Bhl8nvIEY5ntLm69jBYkOM24hVG1Dj6DKR8Gg3QrjbJdr_sF7IR8UdtK4l5ySh9KUpCKy8Q8erUjyhPAvhFR94J_3scyOJowgVZiJ8kMzetAwr5eGDpEreBHWufO39NOsk-LbfnE3k4g_UuxK3Qol3vNWywEBeRhDq72NcoDCtJk-pu9xImpacMJDE2d50OiwLQJRg31UE95Q33JfN52bHvdah2Q8JvsuksKfhvnkFcNr8vRYmmqiqKIA-Vvg" />
+                            <div class="flex flex-col gap-1 justify-center">
+                                <span
+                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-50 text-yellow-700 border border-yellow-100 w-fit">画质模糊</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div
+                        class="p-3 rounded-lg border border-transparent bg-white hover:bg-slate-50 hover:shadow-sm cursor-pointer transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">V2</span>
+                            <span class="text-[10px] text-slate-400">4h ago</span>
+                        </div>
+                        <h4 class="text-sm font-medium text-slate-700 mb-1 line-clamp-2">用户评测集锦 - 护肤套装</h4>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div
+                                class="flex items-center gap-1 text-green-600 bg-green-50 px-1.5 py-0.5 rounded text-xs font-medium border border-green-100">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                <span>92/100</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <img alt="Thumbnail" class="w-16 h-16 object-cover rounded bg-slate-200"
+                                data-alt="Small thumbnail preview of skincare set"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_37ocnt8oiuqvHUCQWziYcKTu5WeGyNpsGdVrs7Ia1WBMIr9AQrIfx16H9O2OmwxUH3X0F7CUmy3vLfDfhLL246OpGtvPBGAlCbPj_7Ktb69HaT1xc-4-CZiLyLEp4Ya_eudik-o1CTdyoTwdjFyn4BJIDbMxLn6F4-JKC9ga5Jh_UYIlSwWGH1gD0SJBAS55CspblGSeY_qcd-YhLUIxnbj8zw6jFSyCLAyCPMpJ7JhsqMsJ-cP9KfKnD2yKmLfUdQTFNHyhPPQ" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Center: Preview Area -->
+            <div class="flex-1 bg-slate-100 flex flex-col relative overflow-hidden">
+                <div
+                    class="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur rounded-lg shadow-sm border border-slate-200 p-1 flex gap-1">
+                    <button class="p-1.5 rounded bg-slate-200 text-slate-700 hover:text-primary transition-colors"
+                        title="Mobile View">
+                        <span class="material-symbols-outlined text-[20px]">smartphone</span>
+                    </button>
+                    <button class="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                        title="Desktop View">
+                        <span class="material-symbols-outlined text-[20px]">desktop_windows</span>
+                    </button>
+                    <div class="w-px bg-slate-200 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                        title="Fullscreen">
+                        <span class="material-symbols-outlined text-[20px]">fullscreen</span>
+                    </button>
+                </div>
+                <div class="flex-1 flex items-center justify-center p-8 overflow-auto">
+                    <!-- Mobile Shell -->
+                    <div
+                        class="w-[375px] h-[720px] bg-black rounded-[40px] border-[8px] border-slate-800 shadow-2xl relative overflow-hidden flex flex-col shrink-0">
+                        <!-- Notch -->
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-xl z-20">
+                        </div>
+                        <!-- Content Inside Phone -->
+                        <div class="flex-1 relative bg-slate-900">
+                            <!-- Video Background Placeholder -->
+                            <img alt="Video Content" class="absolute inset-0 w-full h-full object-cover opacity-90"
+                                data-alt="Portrait video content showing a young woman applying makeup"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH2x2NeleL_EW5s6mvA7kCS4hEDe6kj5e5LK-Qg_aZTW_EQ4b221-Doc-UsY1MCJ5HE0WNhlDPRFuLcVqQs-2XcbrQ7iwL061_485k2qtireHUhaEBOAh4pk8OZVCJ_Y7XrTBZi22ZXBr7J-OeKZQ5r6KVkM6SrYJ9wGBfkgLelZ44iopkLPnBbNw4eB0CTtZG-iBqEdzEzLXPlmRJPlAFaZkjBluRTm_qwBMqRCHXmmVvrhN6eFKleD4qMaqi8hZrKS2Ol3emaf8" />
+                            <!-- TikTok/Xiaohongshu UI Overlay -->
+                            <div
+                                class="absolute inset-0 flex flex-col justify-between p-4 z-10 bg-gradient-to-b from-black/30 via-transparent to-black/60">
+                                <div class="mt-8 flex justify-between items-center text-white/90">
+                                    <span class="material-symbols-outlined">arrow_back_ios</span>
+                                    <div class="flex gap-4 text-sm font-medium text-white/80">
+                                        <span>Following</span>
+                                        <span class="text-white font-bold border-b-2 border-white pb-1">For You</span>
+                                    </div>
+                                    <span class="material-symbols-outlined">search</span>
+                                </div>
+                                <div class="flex flex-col gap-3 mb-4">
+                                    <div class="flex items-end justify-between">
+                                        <div class="flex flex-col gap-2 text-white max-w-[80%]">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-shadow-sm">@BeautyOfficial</span>
+                                                <span
+                                                    class="material-symbols-outlined text-blue-400 text-[16px] bg-white rounded-full">check_circle</span>
+                                            </div>
+                                            <p class="text-sm leading-snug drop-shadow-md">✨ Summer vibes with our new
+                                                collection! Check the link in bio for 20% off. #beauty #summer #makeup
+                                            </p>
+                                            <div
+                                                class="flex items-center gap-1 text-xs mt-1 bg-black/30 w-fit px-2 py-1 rounded backdrop-blur-sm">
+                                                <span class="material-symbols-outlined text-[14px]">music_note</span>
+                                                <span>Original Sound - BeautyOfficial</span>
+                                            </div>
+                                        </div>
+                                        <!-- Right Action Buttons -->
+                                        <div class="flex flex-col items-center gap-4 text-white">
+                                            <div class="relative">
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white overflow-hidden">
+                                                    <img alt="Avatar" class="w-full h-full object-cover"
+                                                        data-alt="User Avatar"
+                                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLdFfwMFZxdrtrJXaTPprPUEN1PHmsF3WZ6fHGBvHOvhJQKcWNGI0YxHrGB9XnFtQKrBO6BlwWYKgBwdvnc6bNHZNrI_zY4EykU7TEEMmHG3mIQU1aOq5xIh-ObSVS6PdwO9xZ1tifZOy-SjQfzPdZ8-P_zZUqxWZxOjTN52pjvmYxx5USOQDerTSbSQunCYbT3KbQNFGbMHkKyJK5lS6J5xUHbEnbTivgmwQet-8mR0DpNxH3OUfeTmxrOQRiQj0Y-acA5GAaV3g" />
+                                                </div>
+                                                <div
+                                                    class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 w-4 h-4 rounded-full flex items-center justify-center">
+                                                    <span class="material-symbols-outlined text-[10px]">add</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <span
+                                                    class="material-symbols-outlined text-[32px] drop-shadow-md">favorite</span>
+                                                <span class="text-xs font-medium drop-shadow-md">12.4k</span>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <span
+                                                    class="material-symbols-outlined text-[32px] drop-shadow-md">comment</span>
+                                                <span class="text-xs font-medium drop-shadow-md">342</span>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <span
+                                                    class="material-symbols-outlined text-[32px] drop-shadow-md">share</span>
+                                                <span class="text-xs font-medium drop-shadow-md">2.1k</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home Indicator -->
+                        <div class="h-5 bg-black w-full flex justify-center items-center">
+                            <div class="w-32 h-1 bg-white/20 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Column: Intervention Panel -->
+            <div class="w-[420px] bg-white border-l border-border-color flex flex-col shrink-0 overflow-y-auto">
+                <!-- Section 1: Agent Reasoning -->
+                <div class="p-5 border-b border-border-color">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+                        <h3 class="text-sm font-bold text-slate-800">Agent Reason (AI 审核意见)</h3>
+                    </div>
+                    <div class="bg-red-50 border border-red-100 rounded-lg p-3 mb-3">
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-red-500 text-[18px] mt-0.5">error</span>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-red-700">敏感词检测</span>
+                                <p class="text-xs text-red-600 mt-1 leading-relaxed">检测到脚本中包含 "绝对"、"第一"
+                                    等极限词，违反广告法规定。建议修改为 "出色"、"领先"。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-yellow-600 text-[18px] mt-0.5">palette</span>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-yellow-700">品牌调性偏离</span>
+                                <p class="text-xs text-yellow-700 mt-1 leading-relaxed">视频色调过于阴暗，与品牌 "活力、阳光" 的
+                                    Guidelines 不符 (Match score: 45%)。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Section 2: Script Editor -->
+                <div class="p-5 flex-1 flex flex-col min-h-[200px] border-b border-border-color">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-slate-800">脚本内容 (Script)</h3>
+                        <button class="text-xs text-primary font-medium hover:underline">查看历史版本</button>
+                    </div>
+                    <div
+                        class="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700 font-mono overflow-y-auto">
+                        <p class="mb-2 text-slate-400 text-xs"># Scene 1: Intro</p>
+                        <p class="mb-2">大家好，今天给大家带来这款<span
+                                class="bg-red-200 text-red-800 px-1 rounded cursor-pointer border-b border-red-400">绝对第一</span>的夏季新品！
+                        </p>
+                        <p class="mb-2 text-slate-400 text-xs"># Scene 2: Demo</p>
+                        <p class="mb-2">看这个质地，真的非常水润。涂在脸上完全不油腻。</p>
+                        <p class="mb-2 text-slate-400 text-xs"># Scene 3: Call to Action</p>
+                        <p>趁着活动赶紧入手吧，错过这村就没这店了！</p>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                        <button class="text-xs flex items-center gap-1 text-slate-500 hover:text-primary">
+                            <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                            进入编辑模式
+                        </button>
+                    </div>
+                </div>
+                <!-- Section 3: Feedback & Actions -->
+                <div class="p-5 bg-slate-50 mt-auto">
+                    <h3 class="text-sm font-bold text-slate-800 mb-2">人工干预指令 (Feedback)</h3>
+                    <textarea
+                        class="w-full h-24 p-3 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none bg-white mb-4"
+                        placeholder="输入给 Agent 的重做指令，例如：修改极限词，调亮画面亮度+20%...">修改所有违规极限词，并将画面整体亮度提升，背景音乐更换为更欢快的版本。</textarea>
+                    <div class="flex flex-col gap-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-medium hover:bg-slate-50 transition-all text-sm">
+                                <span class="material-symbols-outlined text-[18px]">build</span>
+                                手动微调
+                            </button>
+                            <button
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 font-medium hover:bg-red-100 transition-all text-sm">
+                                <span class="material-symbols-outlined text-[18px]">replay</span>
+                                打回重做
+                            </button>
+                        </div>
+                        <button onclick="window.parent.postMessage('openScheduleModal', '*')"
+                            class="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-white font-bold hover:bg-blue-600 shadow-sm hover:shadow transition-all text-sm w-full">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            通过并排期 (Approve)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Archive View (Hidden by default) -->
+        <div id="view-archive" class="flex-1 flex flex-col hidden bg-slate-50 overflow-y-auto w-full">
+            <!-- Filter Bar -->
+            <div class="bg-white px-8 py-5 border-b border-border-color sticky top-0 z-10">
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex gap-4 items-center w-full md:w-auto">
+                        <div class="relative w-full md:w-80">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
+                            <input
+                                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all"
+                                placeholder="搜索资产名称、标签或类型..." type="text">
+                        </div>
+                        <div class="h-6 w-px bg-slate-200 hidden md:block"></div>
+                        <div class="flex gap-2 hidden md:flex">
+                            <button
+                                class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg shadow-sm">全部格式</button>
+                            <button
+                                class="px-4 py-2 text-sm font-medium bg-white text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">视频
+                                (128)</button>
+                            <button
+                                class="px-4 py-2 text-sm font-medium bg-white text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">图文
+                                (45)</button>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button
+                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50">
+                            <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            高级筛选
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset Grid -->
+            <div class="p-8">
+                <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+
+                    <!-- Asset Card: Video 1 -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/40 transition-all group flex flex-col cursor-pointer">
+                        <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH2x2NeleL_EW5s6mvA7kCS4hEDe6kj5e5LK-Qg_aZTW_EQ4b221-Doc-UsY1MCJ5HE0WNhlDPRFuLcVqQs-2XcbrQ7iwL061_485k2qtireHUhaEBOAh4pk8OZVCJ_Y7XrTBZi22ZXBr7J-OeKZQ5r6KVkM6SrYJ9wGBfkgLelZ44iopkLPnBbNw4eB0CTtZG-iBqEdzEzLXPlmRJPlAFaZkjBluRTm_qwBMqRCHXmmVvrhN6eFKleD4qMaqi8hZrKS2Ol3emaf8"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                <button
+                                    class="w-full py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-blue-600 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">magic_button</span>
+                                    以此为模板创作
+                                </button>
+                            </div>
+                            <div
+                                class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-slate-700 flex items-center gap-1 shadow-sm">
+                                <span class="material-symbols-outlined text-[14px] text-blue-600">movie</span>
+                                爆款短视频
+                            </div>
+                            <div
+                                class="absolute top-3 right-3 bg-black/60 px-1.5 py-0.5 rounded text-[10px] text-white">
+                                00:45
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1">
+                            <h3
+                                class="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                                夏季出游穿搭必备大爆款指南</h3>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#穿搭</span>
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#夏季上新</span>
+                            </div>
+                            <div
+                                class="mt-auto flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    <span>2.4w</span>
+                                </div>
+                                <span>3天前</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asset Card: Article 1 -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/40 transition-all group flex flex-col cursor-pointer">
+                        <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-orange-100 to-amber-50 flex flex-col items-center justify-center p-6 text-center group-hover:scale-105 transition-transform duration-500">
+                                <span
+                                    class="material-symbols-outlined text-[48px] text-orange-400 mb-4 drop-shadow-sm">menu_book</span>
+                                <p
+                                    class="text-[10px] font-serif text-amber-800/60 font-bold uppercase tracking-widest mb-2">
+                                    小红书爆款图文模板</p>
+                                <h4 class="font-bold text-amber-950 leading-snug line-clamp-3">职场新人必看：第一周如何让老板记住你？</h4>
+                            </div>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                <button
+                                    class="w-full py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-blue-600 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">magic_button</span>
+                                    以此为模板创作
+                                </button>
+                            </div>
+                            <div
+                                class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-slate-700 flex items-center gap-1 shadow-sm">
+                                <span class="material-symbols-outlined text-[14px] text-orange-500">article</span>
+                                小红书图文
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1">
+                            <h3
+                                class="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                                职场高情商沟通模板库</h3>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#职场干货</span>
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#高赞模板</span>
+                            </div>
+                            <div
+                                class="mt-auto flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">file_copy</span>
+                                    <span>被复用 1,204 次</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asset Card: Video 2 -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:border-primary/40 transition-all group flex flex-col cursor-pointer">
+                        <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_37ocnt8oiuqvHUCQWziYcKTu5WeGyNpsGdVrs7Ia1WBMIr9AQrIfx16H9O2OmwxUH3X0F7CUmy3vLfDfhLL246OpGtvPBGAlCbPj_7Ktb69HaT1xc-4-CZiLyLEp4Ya_eudik-o1CTdyoTwdjFyn4BJIDbMxLn6F4-JKC9ga5Jh_UYIlSwWGH1gD0SJBAS55CspblGSeY_qcd-YhLUIxnbj8zw6jFSyCLAyCPMpJ7JhsqMsJ-cP9KfKnD2yKmLfUdQTFNHyhPPQ"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                <button
+                                    class="w-full py-2 bg-primary text-white text-sm font-bold rounded-lg shadow-lg hover:bg-blue-600 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">magic_button</span>
+                                    以此为模板创作
+                                </button>
+                            </div>
+                            <div
+                                class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-slate-700 flex items-center gap-1 shadow-sm">
+                                <span class="material-symbols-outlined text-[14px] text-blue-600">movie</span>
+                                护肤评测视频
+                            </div>
+                            <div
+                                class="absolute top-3 right-3 bg-black/60 px-1.5 py-0.5 rounded text-[10px] text-white">
+                                01:20
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1">
+                            <h3
+                                class="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                                换季敏感肌急救指南精华评测</h3>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#美妆护肤</span>
+                                <span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">#干货评测</span>
+                            </div>
+                            <div
+                                class="mt-auto flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    <span>5.8w</span>
+                                </div>
+                                <span>1周前</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add New / Empty State Template -->
+                    <div
+                        class="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 hover:border-primary/50 hover:bg-slate-100 transition-all flex flex-col items-center justify-center cursor-pointer min-h-[300px] text-slate-500 hover:text-primary">
+                        <div
+                            class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 border border-slate-200">
+                            <span class="material-symbols-outlined text-[24px]">add</span>
+                        </div>
+                        <h3 class="text-sm font-bold mb-1">导入外部资产</h3>
+                        <p class="text-xs opacity-75 text-center px-6">将表现优异的内容导入为通用模板，共享给团队使用</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <!-- Schedule Modal moved to index.html for global overlay -->
+
+    <script>
+        function switchTab(tabId) {
+            const tabPending = document.getElementById('tab-pending');
+            const tabArchive = document.getElementById('tab-archive');
+            const tabPendingText = document.getElementById('tab-pending-text');
+            const tabArchiveText = document.getElementById('tab-archive-text');
+
+            const viewPending = document.getElementById('view-pending');
+            const viewArchive = document.getElementById('view-archive');
+
+            if (tabId === 'pending') {
+                // Style Pending Tab as Active
+                tabPending.className = "flex flex-col items-center justify-center border-b-[3px] border-primary pb-3 px-1 transition-colors";
+                tabPendingText.className = "flex items-center gap-2 text-primary";
+
+                // Style Archive Tab as Inactive
+                tabArchive.className = "flex flex-col items-center justify-center border-b-[3px] border-transparent pb-3 px-1 hover:border-slate-300 transition-colors";
+                tabArchiveText.className = "flex items-center gap-2 text-slate-500";
+
+                // Toggle Views
+                viewPending.classList.remove('hidden');
+                viewArchive.classList.add('hidden');
+            } else if (tabId === 'archive') {
+                // Style Archive Tab as Active
+                tabArchive.className = "flex flex-col items-center justify-center border-b-[3px] border-primary pb-3 px-1 transition-colors";
+                tabArchiveText.className = "flex items-center gap-2 text-primary";
+
+                // Style Pending Tab as Inactive
+                tabPending.className = "flex flex-col items-center justify-center border-b-[3px] border-transparent pb-3 px-1 hover:border-slate-300 transition-colors";
+                tabPendingText.className = "flex items-center gap-2 text-slate-500";
+
+                // Toggle Views
+                viewPending.classList.add('hidden');
+                viewArchive.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>

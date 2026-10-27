@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI工作流编排与控制台 (浅色版)</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb",
+                        "primary-dark": "#1d4ed8",
+                        "background-light": "#ffffff",
+                        "background-subtle": "#f8f9fa",
+                        "surface-light": "#ffffff",
+                        "border-light": "#e2e8f0",
+                        "console-bg": "#f8fafc",
+                        "text-main": "#0f172a",
+                        "text-sub": "#64748b",
+                        "log-info": "#0369a1",
+                        "log-success": "#15803d",
+                        "log-warn": "#b45309",
+                        "log-error": "#b91c1c",
+                        "log-debug": "#64748b",
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', '"Noto Sans SC"', "sans-serif"],
+                        body: ['"Noto Sans SC"', "sans-serif"],
+                        mono: ['"Fira Code"', 'monospace'],
+                    },
+                    boxShadow: {
+                        'console-up': '0 -4px 20px rgba(0, 0, 0, 0.05)',
+                        'node': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+                        'node-hover': '0 8px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+                linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .node-glow {
+            box-shadow: 0 0 0 1px #9333ea, 0 4px 12px rgba(147, 51, 234, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .node-glow:hover {
+            box-shadow: 0 0 0 2px #9333ea, 0 8px 24px rgba(147, 51, 234, 0.15);
+        }
+
+        .bezier-path {
+            stroke-dasharray: 10;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        .console-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .console-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .console-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .console-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .blink-cursor {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-text-main font-display h-screen overflow-hidden flex flex-col antialiased">
+    <header
+        class="flex items-center justify-between whitespace-nowrap border-b border-border-light bg-surface-light px-6 py-3 h-16 shrink-0 z-50 relative">
+        <div class="flex items-center gap-4">
+            <div
+                class="size-8 bg-blue-50 rounded-lg flex items-center justify-center text-primary border border-blue-100">
+                <span class="material-symbols-outlined">hub</span>
+            </div>
+            <h2 class="text-text-main text-lg font-bold leading-tight tracking-[-0.015em]">AI Agent 工作流编排</h2>
+            <div class="ml-4 flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-200">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-xs text-green-700 font-medium">系统运行正常</span>
+            </div>
+        </div>
+        <div class="flex flex-1 justify-end gap-6 items-center">
+            <nav class="flex items-center gap-6 mr-4">
+                <a class="text-text-sub hover:text-text-main text-sm font-medium transition-colors" href="#">工作台</a>
+                <a class="text-text-sub hover:text-text-main text-sm font-medium transition-colors" href="#">市场</a>
+                <a class="text-text-sub hover:text-text-main text-sm font-medium transition-colors" href="#">设置</a>
+            </nav>
+            <div class="h-6 w-px bg-border-light"></div>
+            <div class="flex gap-3">
+                <button
+                    class="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white border border-border-light hover:bg-slate-50 text-text-main text-sm font-medium transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    <span>保存</span>
+                </button>
+                <button
+                    class="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold shadow-md shadow-blue-200 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    <span>运行工作流</span>
+                </button>
+            </div>
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-border-light shadow-sm"
+                data-alt="User profile avatar placeholder"
+                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAJ_1ZG_Xh8w63yJkBYOQTnyPfEraydAsjU2EiD3Di-_P1yFfHpNzr9u_IZ-1fKOfKHjSeCnqEOXIvdWzC1yFfVBVyolFvtR7Xe0a_Rtko5CMlDy5BfOVer-YZHrrudYnxRrz9bcyJBBhbq6twMDwEIxp1hz-Qk7zMLeMjX8sE-8OQYOYXbAfSORQowsQgJmRUMntOcdJ6-OO6seQ-u5NhE94GYFLrXNF-80zKDPy7zR-Tm081jMyaiJAI-gkLS1Rl4ZsYNjE0LfnU");'>
+            </div>
+        </div>
+    </header>
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <aside class="w-64 bg-background-subtle border-r border-border-light flex flex-col z-20 shrink-0">
+            <div class="p-4 border-b border-border-light bg-white">
+                <h1 class="text-text-main text-sm font-bold mb-1">组件库</h1>
+                <p class="text-text-sub text-xs">拖拽组件至画布以构建逻辑</p>
+                <div class="mt-3 relative">
+                    <span
+                        class="material-symbols-outlined absolute left-2.5 top-2 text-text-sub text-[18px]">search</span>
+                    <input
+                        class="w-full bg-slate-50 border border-border-light rounded-md py-1.5 pl-9 pr-3 text-sm text-text-main placeholder-text-sub focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm"
+                        placeholder="搜索节点..." type="text" />
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto no-scrollbar p-2 bg-white">
+                <div class="space-y-6 pt-2">
+                    <div>
+                        <div class="px-2 mb-2 flex items-center justify-between group cursor-pointer">
+                            <h3 class="text-xs font-semibold text-text-sub uppercase tracking-wider">基础节点</h3>
+                            <span
+                                class="material-symbols-outlined text-text-sub text-[16px] group-hover:text-text-main">expand_less</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="trigger"
+                                data-node-title="输入触发器" data-node-icon="input" data-node-color="purple"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span class="material-symbols-outlined text-purple-600 pointer-events-none">input</span>
+                                <span class="text-sm text-text-main pointer-events-none">输入触发器</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="response"
+                                data-node-title="输出响应" data-node-icon="output" data-node-color="purple"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-purple-600 pointer-events-none">output</span>
+                                <span class="text-sm text-text-main pointer-events-none">输出响应</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="px-2 mb-2 flex items-center justify-between group cursor-pointer">
+                            <h3 class="text-xs font-semibold text-text-sub uppercase tracking-wider">AI 模型</h3>
+                            <span
+                                class="material-symbols-outlined text-text-sub text-[16px] group-hover:text-text-main">expand_less</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="llm"
+                                data-node-title="通用 LLM" data-node-icon="psychology" data-node-color="blue"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-blue-600 pointer-events-none">psychology</span>
+                                <span class="text-sm text-blue-900 font-medium pointer-events-none">通用 LLM</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="image"
+                                data-node-title="图像生成模型" data-node-icon="image" data-node-color="blue"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span class="material-symbols-outlined text-blue-500 pointer-events-none">image</span>
+                                <span class="text-sm text-text-main pointer-events-none">图像生成模型</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="video"
+                                data-node-title="视频生成模型" data-node-icon="videocam" data-node-color="blue"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-blue-500 pointer-events-none">videocam</span>
+                                <span class="text-sm text-text-main pointer-events-none">视频生成模型</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="px-2 mb-2 flex items-center justify-between group cursor-pointer">
+                            <h3 class="text-xs font-semibold text-text-sub uppercase tracking-wider">智能体 (Agents)</h3>
+                            <span
+                                class="material-symbols-outlined text-text-sub text-[16px] group-hover:text-text-main">expand_less</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="planner"
+                                data-node-title="规划师 (Planner)" data-node-icon="assignment_ind" data-node-color="green"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-emerald-600 pointer-events-none">assignment_ind</span>
+                                <span class="text-sm text-text-main pointer-events-none">规划师 (Planner)</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="copywriter"
+                                data-node-title="文案 (Copywriter)" data-node-icon="edit_note" data-node-color="green"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-emerald-600 pointer-events-none">edit_note</span>
+                                <span class="text-sm text-text-main pointer-events-none">文案 (Copywriter)</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="critic"
+                                data-node-title="评审 (Critic)" data-node-icon="rate_review" data-node-color="green"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-emerald-600 pointer-events-none">rate_review</span>
+                                <span class="text-sm text-text-main pointer-events-none">评审 (Critic)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="px-2 mb-2 flex items-center justify-between group cursor-pointer">
+                            <h3 class="text-xs font-semibold text-text-sub uppercase tracking-wider">工具集</h3>
+                            <span
+                                class="material-symbols-outlined text-text-sub text-[16px] group-hover:text-text-main">expand_less</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="search"
+                                data-node-title="网络搜索" data-node-icon="search" data-node-color="orange"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-orange-500 pointer-events-none">search</span>
+                                <span class="text-sm text-text-main pointer-events-none">网络搜索</span>
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" data-node-type="db"
+                                data-node-title="数据库查询" data-node-icon="database" data-node-color="orange"
+                                class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-50 cursor-grab active:cursor-grabbing group transition-colors border border-transparent hover:border-border-light">
+                                <span
+                                    class="material-symbols-outlined text-orange-500 pointer-events-none">database</span>
+                                <span class="text-sm text-text-main pointer-events-none">数据库查询</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-light bg-background-subtle">
+                <div class="flex items-center justify-between text-xs text-text-sub">
+                    <span>版本 v2.4.0</span>
+                    <span class="flex items-center gap-1 text-green-600 font-medium"><span
+                            class="w-1.5 h-1.5 rounded-full bg-green-500"></span>在线</span>
+                </div>
+            </div>
+        </aside>
+        <main id="workflow-canvas" ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
+            class="flex-1 relative overflow-hidden bg-white grid-bg flex flex-col">
+            <div class="absolute top-6 left-6 flex gap-2 z-10">
+                <div class="bg-white border border-border-light rounded-lg flex flex-col shadow-lg shadow-slate-200/50">
+                    <button
+                        class="p-2 hover:bg-slate-50 hover:text-text-main text-text-sub transition-colors rounded-t-lg border-b border-border-light"><span
+                            class="material-symbols-outlined text-[20px]">add</span></button>
+                    <button
+                        class="p-2 hover:bg-slate-50 hover:text-text-main text-text-sub transition-colors border-b border-border-light"><span
+                            class="material-symbols-outlined text-[20px]">remove</span></button>
+                    <button
+                        class="p-2 hover:bg-slate-50 hover:text-text-main text-text-sub transition-colors rounded-b-lg"><span
+                            class="material-symbols-outlined text-[20px]">fit_screen</span></button>
+                </div>
+            </div>
+            <div
+                class="absolute top-6 right-6 z-10 bg-white border border-border-light rounded-lg p-1 shadow-lg shadow-slate-200/50 w-48 h-32 opacity-90 hover:opacity-100 transition-opacity">
+                <div
+                    class="w-full h-full bg-slate-50 rounded flex items-center justify-center overflow-hidden relative border border-slate-100">
+                    <div class="absolute top-4 left-4 w-8 h-6 bg-purple-200 rounded-sm"></div>
+                    <div class="absolute top-10 left-12 w-8 h-6 bg-blue-200 rounded-sm"></div>
+                    <div class="border-2 border-primary/40 w-24 h-16 absolute top-2 left-2 rounded-sm bg-white/50">
+                    </div>
+                </div>
+            </div>
+            <!-- Edges Container -->
+            <svg id="edge-container" class="absolute inset-0 w-full h-full pointer-events-none z-0">
+                <defs>
+                    <marker id="arrowhead" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5">
+                        <polygon fill="#94a3b8" points="0 0, 10 3.5, 0 7"></polygon>
+                    </marker>
+                    <marker id="arrowhead-active" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5">
+                        <polygon fill="#2563eb" points="0 0, 10 3.5, 0 7"></polygon>
+                    </marker>
+                </defs>
+            </svg>
+
+            <!-- Nodes Container -->
+            <div id="node-container" class="absolute inset-0 w-full h-full z-1 pointer-events-none">
+                <!-- Dynamic nodes will be inserted here -->
+            </div>
+            <div
+                class="absolute bottom-0 left-0 right-0 bg-console-bg border-t border-border-light shadow-console-up flex flex-col z-30 h-80 transition-transform duration-300 ease-in-out transform translate-y-0">
+                <div class="flex items-center justify-between px-4 py-2 border-b border-border-light bg-white">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 text-text-main font-medium text-sm">
+                            <span class="material-symbols-outlined text-[18px] text-text-sub">terminal</span>
+                            实时调试控制台
+                        </div>
+                        <div class="h-4 w-px bg-border-light mx-1"></div>
+                        <div class="flex gap-2">
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">RUNNING</span>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">AGENT:
+                                COPYWRITER</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex bg-slate-100 rounded-md border border-slate-200 p-0.5">
+                            <button
+                                class="px-2 py-1 rounded hover:bg-white text-slate-500 hover:text-slate-800 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">pause</span>
+                            </button>
+                            <button class="px-2 py-1 rounded bg-white text-green-600 shadow-sm border border-slate-100">
+                                <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                            </button>
+                            <button
+                                class="px-2 py-1 rounded hover:bg-white text-red-500 hover:text-red-700 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">stop</span>
+                            </button>
+                        </div>
+                        <div class="h-4 w-px bg-border-light"></div>
+                        <button class="text-text-sub hover:text-text-main transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+                        </button>
+                        <button class="text-text-sub hover:text-text-main transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">settings</span>
+                        </button>
+                        <button class="text-text-sub hover:text-text-main transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 flex overflow-hidden font-mono text-xs bg-console-bg">
+                    <div class="w-48 border-r border-border-light p-2 flex flex-col gap-1 bg-white">
+                        <div class="px-2 py-1.5 text-[11px] font-semibold text-text-sub uppercase tracking-wider mb-1">
+                            过滤器</div>
+                        <button
+                            class="flex items-center justify-between w-full px-2 py-1.5 rounded hover:bg-slate-50 text-left text-text-main transition-colors bg-blue-50/50 border border-blue-100/50">
+                            <span class="flex items-center gap-2"><span
+                                    class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>全部日志</span>
+                            <span class="text-[10px] text-slate-500">124</span>
+                        </button>
+                        <button
+                            class="flex items-center justify-between w-full px-2 py-1.5 rounded hover:bg-slate-50 text-left text-slate-600 transition-colors">
+                            <span class="flex items-center gap-2"><span
+                                    class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Agent Thoughts</span>
+                            <span class="text-[10px] text-slate-400">42</span>
+                        </button>
+                        <button
+                            class="flex items-center justify-between w-full px-2 py-1.5 rounded hover:bg-slate-50 text-left text-slate-600 transition-colors">
+                            <span class="flex items-center gap-2"><span
+                                    class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>System Warnings</span>
+                            <span class="text-[10px] text-slate-400">3</span>
+                        </button>
+                        <button
+                            class="flex items-center justify-between w-full px-2 py-1.5 rounded hover:bg-slate-50 text-left text-slate-600 transition-colors">
+                            <span class="flex items-center gap-2"><span
+                                    class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Errors</span>
+                            <span class="text-[10px] text-slate-400">0</span>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 console-scrollbar space-y-3 bg-[#f8fafc]">
+                        <div class="flex gap-3 group hover:bg-slate-100 -mx-4 px-4 py-1 transition-colors">
+                            <div class="w-16 text-slate-400 shrink-0 select-none text-right">14:02:45</div>
+                            <div class="w-24 shrink-0 text-log-info font-bold select-none">[INFO]</div>
+                            <div class="text-slate-700 break-all">Workflow initiated with ID <span
+                                    class="text-primary font-medium">#wf_8821a</span></div>
+                        </div>
+                        <div class="flex gap-3 group hover:bg-slate-100 -mx-4 px-4 py-1 transition-colors">
+                            <div class="w-16 text-slate-400 shrink-0 select-none text-right">14:02:46</div>
+                            <div class="w-24 shrink-0 text-log-success font-bold select-none">[PLANNER]</div>
+                            <div class="text-slate-700">
+                                <span class="text-log-success font-medium">Task received:</span> "Promote New Product
+                                X". Decomposing into sub-tasks...
+                                <div class="mt-1 pl-2 border-l-2 border-slate-300 text-slate-500">
+                                    &gt; Step 1: Analyze product features<br />
+                                    &gt; Step 2: Identify target audience<br />
+                                    &gt; Step 3: Generate copy drafts
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 group hover:bg-slate-100 -mx-4 px-4 py-1 transition-colors">
+                            <div class="w-16 text-slate-400 shrink-0 select-none text-right">14:02:48</div>
+                            <div class="w-24 shrink-0 text-purple-600 font-bold select-none">[COPYWRITER]</div>
+                            <div class="flex-1">
+                                <div class="text-slate-700 mb-1">Generating draft content based on constraints...</div>
+                                <div
+                                    class="bg-white border border-border-light rounded p-2 text-slate-600 font-mono text-[11px] shadow-sm">
+                                    <pre>{
+  <span class="text-blue-700">"agent_id"</span>: <span class="text-orange-600">"copy_01"</span>,
+  <span class="text-blue-700">"action"</span>: <span class="text-orange-600">"generate_text"</span>,
+  <span class="text-blue-700">"parameters"</span>: {
+    <span class="text-blue-700">"style"</span>: <span class="text-orange-600">"xiaohongshu"</span>,
+    <span class="text-blue-700">"keywords"</span>: [<span class="text-orange-600">"aesthetic"</span>, <span class="text-orange-600">"must-have"</span>],
+    <span class="text-blue-700">"temperature"</span>: <span class="text-green-600">0.7</span>
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 group hover:bg-slate-100 -mx-4 px-4 py-1 transition-colors">
+                            <div class="w-16 text-slate-400 shrink-0 select-none text-right">14:02:50</div>
+                            <div class="w-24 shrink-0 text-log-warn font-bold select-none">[WARNING]</div>
+                            <div class="text-log-warn">Token usage approaching limit for current step (85%).</div>
+                        </div>
+                        <div
+                            class="flex gap-3 group hover:bg-blue-50/50 -mx-4 px-4 py-1 border-l-2 border-primary bg-blue-50/20">
+                            <div class="w-16 text-slate-400 shrink-0 select-none text-right">14:02:52</div>
+                            <div class="w-24 shrink-0 text-primary font-bold select-none">[THOUGHT]</div>
+                            <div class="text-slate-800">
+                                Critic Agent is evaluating the draft score... <span
+                                    class="inline-block w-2 h-4 bg-primary align-middle blink-cursor"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <aside class="w-80 bg-background-subtle border-l border-border-light flex flex-col z-20 shrink-0 h-full pb-80">
+            <div class="p-4 border-b border-border-light flex justify-between items-center bg-white">
+                <h2 class="text-text-main text-sm font-bold">属性面板</h2>
+                <span class="text-xs text-text-sub px-2 py-1 bg-slate-50 rounded border border-border-light">ID:
+                    #Node_882A</span>
+            </div>
+            <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6 bg-white">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary">edit_note</span>
+                    </div>
+                    <div>
+                        <h3 class="text-text-main font-medium">Copywriter Agent</h3>
+                        <p class="text-text-sub text-xs mt-1">负责根据产品信息生成营销文案，专注于社交媒体风格。</p>
+                    </div>
+                </div>
+                <hr class="border-border-light" />
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-medium text-text-main">模型选择 (Model)</label>
+                        <select
+                            class="bg-white border border-border-light text-text-main text-sm rounded-lg p-2.5 focus:ring-primary focus:border-primary block w-full shadow-sm">
+                            <option>GPT-4 Turbo</option>
+                            <option>Claude 3.5 Sonnet</option>
+                            <option>Llama 3 70B</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-medium text-text-main">系统提示词 (System Prompt)</label>
+                        <textarea
+                            class="bg-white border border-border-light text-text-main text-sm rounded-lg p-2.5 focus:ring-primary focus:border-primary block w-full resize-none font-mono text-xs leading-relaxed shadow-sm"
+                            rows="4" spellcheck="false">你是一个专业的小红书文案写手。请使用活泼、吸引人的语气，多使用emoji，并重点突出产品的痛点解决方案。</textarea>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between">
+                            <label class="text-xs font-medium text-text-main">温度 (Temperature)</label>
+                            <span class="text-xs text-primary font-mono font-bold">0.7</span>
+                        </div>
+                        <input class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                            max="1" min="0" step="0.1" type="range" value="0.7" />
+                    </div>
+                </div>
+                <hr class="border-border-light" />
+                <div class="flex flex-col gap-2 flex-1">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-medium text-text-main">高级参数 (JSON)</label>
+                        <button class="text-primary text-xs hover:underline font-medium">格式化</button>
+                    </div>
+                    <div
+                        class="bg-slate-50 rounded-lg border border-border-light p-3 font-mono text-[11px] leading-5 text-slate-700 overflow-x-auto shadow-inner">
+                        <pre><code>{
+  "max_tokens": 2048,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stream": true,
+  "tools": [
+    "web_search",
+    "image_analysis"
+  ]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-border-light bg-background-subtle flex gap-3">
+                <button
+                    class="flex-1 bg-white hover:bg-slate-50 text-text-main text-sm font-medium py-2 px-4 rounded-lg border border-border-light transition-colors shadow-sm">
+                    重置
+                </button>
+                <button
+                    class="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 px-4 rounded-lg shadow-md shadow-blue-200 transition-colors">
+                    应用更改
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // State Management
+        let nodes = [];
+        let selectedNodeId = null;
+        let isDraggingNode = false;
+        let currentDragNodeId = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        const canvas = document.getElementById('workflow-canvas');
+        const nodeContainer = document.getElementById('node-container');
+
+        // ==== Drag and Drop from Sidebar ====
+        function handleDragStart(event) {
+            const el = event.currentTarget;
+            const nodeData = {
+                type: el.dataset.nodeType,
+                title: el.dataset.nodeTitle,
+                icon: el.dataset.nodeIcon,
+                color: el.dataset.nodeColor
+            };
+            event.dataTransfer.setData('application/json', JSON.stringify(nodeData));
+            event.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault(); // allow drop
+            event.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const dataString = event.dataTransfer.getData('application/json');
+
+            if (!dataString) return;
+
+            try {
+                const nodeData = JSON.parse(dataString);
+                const rect = canvas.getBoundingClientRect();
+
+                // Calculate drop position relative to canvas
+                const x = event.clientX - rect.left - 100; // offset approx half node width
+                const y = event.clientY - rect.top - 40;   // offset approx half node height
+
+                const newNode = {
+                    id: 'node_' + Math.random().toString(36).substr(2, 9),
+                    x: Math.max(0, x),
+                    y: Math.max(0, y),
+                    ...nodeData
+                };
+
+                nodes.push(newNode);
+                selectNode(newNode.id);
+                renderNodes();
+            } catch (e) {
+                console.error("Error parsing dragged node data", e);
+            }
+        }
+
+        // ==== Node Rendering ====
+        function renderNodes() {
+            nodeContainer.innerHTML = '';
+
+            nodes.forEach(node => {
+                const isSelected = node.id === selectedNodeId;
+
+                // Color configs map visual states
+                const colorConfig = {
+                    purple: { border: 'border-purple-200', HeaderBg: 'bg-purple-50', headerBorder: 'border-purple-100', icon: 'text-purple-600', title: 'text-purple-900', glow: 'node-glow' },
+                    blue: { border: 'border-blue-200', HeaderBg: 'bg-blue-50', headerBorder: 'border-blue-100', icon: 'text-blue-600', title: 'text-blue-900', glow: 'shadow-[0_4px_20px_rgba(37,99,235,0.15)]' },
+                    green: { border: 'border-emerald-200', HeaderBg: 'bg-emerald-50', headerBorder: 'border-emerald-100', icon: 'text-emerald-600', title: 'text-emerald-900', glow: 'shadow-[0_4px_20px_rgba(16,185,129,0.15)]' },
+                    orange: { border: 'border-orange-200', HeaderBg: 'bg-orange-50', headerBorder: 'border-orange-100', icon: 'text-orange-500', title: 'text-orange-900', glow: 'shadow-[0_4px_20px_rgba(249,115,22,0.15)]' }
+                };
+
+                const style = colorConfig[node.color] || colorConfig.blue;
+                const activeClasses = isSelected ? `border-2 ${style.glow}` : 'border border-border-light hover:border-blue-400 opacity-90 hover:opacity-100 shadow-node hover:shadow-node-hover';
+                const paddingOffsets = isSelected ? '-1px' : '0px';
+
+                // We define custom mousedown handler inline to hijack canvas events
+                const nodeHtml = `
+                    <div id="${node.id}"
+                        class="absolute w-[200px] bg-white rounded-xl flex flex-col pointer-events-auto cursor-pointer transition-shadow select-none group ${activeClasses}"
+                        style="left: ${node.x}px; top: ${node.y}px; margin-left: ${paddingOffsets}; margin-top: ${paddingOffsets}; z-index: ${isSelected ? 10 : 1};"
+                        onmousedown="handleNodeMouseDown(event, '${node.id}')"
+                        onclick="selectNode('${node.id}')">
+                        
+                        <div class="px-4 py-3 border-b ${isSelected ? style.headerBorder : 'border-border-light'} flex items-center justify-between ${isSelected ? style.HeaderBg : 'bg-white'} rounded-t-xl transition-colors">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined ${style.icon} text-sm">${node.icon}</span>
+                                <span class="text-sm font-bold ${isSelected ? style.title : 'text-text-main'} truncate max-w-[120px]">${node.title}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-text-sub text-[16px] hover:text-text-main">more_vert</span>
+                        </div>
+                        <div class="p-4 space-y-2 pointer-events-none">
+                            <div class="text-xs text-text-sub">Node type: ${node.type}</div>
+                        </div>
+                        
+                        <!-- Connection ports (visual only) -->
+                        <div class="absolute left-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-slate-400 shadow-sm z-10 hidden group-hover:block"></div>
+                        <div class="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border-2 border-blue-500 cursor-pointer shadow-sm z-10 transition-transform hover:scale-125"></div>
+                    </div>
+                `;
+
+                nodeContainer.insertAdjacentHTML('beforeend', nodeHtml);
+            });
+        }
+
+        // ==== Canvas Node Moving ====
+        function handleNodeMouseDown(event, id) {
+            if (event.button !== 0) return; // Only left click start
+
+            event.stopPropagation(); // Avoid triggering canvas deselection immediately
+            selectNode(id);
+
+            const node = nodes.find(n => n.id === id);
+            if (!node) return;
+
+            isDraggingNode = true;
+            currentDragNodeId = id;
+
+            // Calc offset
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            dragOffsetX = mouseX - node.x;
+            dragOffsetY = mouseY - node.y;
+
+            document.addEventListener('mousemove', handleNodeMouseMove);
+            document.addEventListener('mouseup', handleNodeMouseUp);
+        }
+
+        function handleNodeMouseMove(event) {
+            if (!isDraggingNode || !currentDragNodeId) return;
+
+            const node = nodes.find(n => n.id === currentDragNodeId);
+            if (!node) return;
+
+            const rect = canvas.getBoundingClientRect();
+            let newX = event.clientX - rect.left - dragOffsetX;
+            let newY = event.clientY - rect.top - dragOffsetY;
+
+            node.x = newX;
+            node.y = newY;
+
+            // Fast DOM update without full render
+            const nodeEl = document.getElementById(currentDragNodeId);
+            if (nodeEl) {
+                nodeEl.style.left = newX + 'px';
+                nodeEl.style.top = newY + 'px';
+            }
+        }
+
+        function handleNodeMouseUp() {
+            isDraggingNode = false;
+            currentDragNodeId = null;
+            document.removeEventListener('mousemove', handleNodeMouseMove);
+            document.removeEventListener('mouseup', handleNodeMouseUp);
+        }
+
+        // ==== Selection and Properties ====
+        function selectNode(id) {
+            if (selectedNodeId === id) return;
+            selectedNodeId = id;
+            renderNodes();
+            updatePropertiesPanel();
+        }
+
+        // Deselect on canvas click
+        canvas.addEventListener('mousedown', function (e) {
+            if (e.target === canvas || e.target === nodeContainer || e.target.closest('svg')) {
+                selectedNodeId = null;
+                renderNodes();
+                updatePropertiesPanel();
+            }
+        });
+
+        function updatePropertiesPanel() {
+            const panelTitle = document.querySelector('aside.w-80 h3');
+            const panelSubtitle = document.querySelector('aside.w-80 p.text-xs');
+            const panelIdBadge = document.querySelector('aside.w-80 span.text-xs.bg-slate-50');
+            const iconEl = document.querySelector('aside.w-80 .w-10.h-10 span');
+
+            if (selectedNodeId) {
+                const node = nodes.find(n => n.id === selectedNodeId);
+                if (node && panelTitle) {
+                    panelTitle.textContent = node.title;
+                    panelSubtitle.textContent = "配置 " + node.title + " 的相关参数。";
+                    if (panelIdBadge) panelIdBadge.textContent = "ID: #" + node.id.split('_')[1].toUpperCase();
+                    if (iconEl) iconEl.textContent = node.icon;
+                }
+            } else {
+                if (panelTitle) panelTitle.textContent = "未选中节点";
+                if (panelSubtitle) panelSubtitle.textContent = "请在画布上点击一个节点以配置其属性。";
+                if (panelIdBadge) panelIdBadge.textContent = "ID: ---";
+                if (iconEl) iconEl.textContent = "touch_app";
+            }
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI内容仿写创作台</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563EB",
+                        "primary-hover": "#1D4ED8",
+                        "background": "#F8F9FA",
+                        "surface": "#FFFFFF",
+                        "surface-secondary": "#F1F5F9",
+                        "border": "#E2E8F0",
+                        "text-main": "#1E293B",
+                        "text-secondary": "#64748B",
+                        "text-tertiary": "#94A3B8",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Noto Sans", sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: "Space Grotesk", sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-text-main min-h-screen overflow-hidden flex antialiased selection:bg-primary/20 selection:text-primary">
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-background">
+        <header
+            class="h-16 border-b border-border bg-surface/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+            <div class="flex flex-col w-1/4">
+                <h2 class="text-xl font-bold tracking-tight text-text-main">内容创作台</h2>
+                <p class="text-xs text-text-secondary">支持多模态一键原创生成</p>
+            </div>
+
+            <!-- Type Tabs Removed: Moved to sidebar in main layout -->
+            <div class="flex-1"></div>
+
+            <div class="flex items-center gap-4 w-1/4 justify-end">
+                <button onclick="window.parent.postMessage('openGenerationModal', '*')"
+                    class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg shadow-primary/20 shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+                    开始生成
+                </button>
+            </div>
+        </header>
+
+        <!-- Video Creation View -->
+        <div id="view-video" class="flex-1 overflow-hidden p-6 grid grid-cols-12 gap-6">
+            <div class="col-span-5 flex flex-col gap-6 h-full overflow-y-auto pr-2 custom-scrollbar">
+                <div class="bg-surface rounded-2xl border border-border overflow-hidden shadow-card shrink-0">
+                    <div class="p-4 border-b border-border/50 flex justify-between items-center bg-gray-50/50">
+                        <h3 class="font-bold flex items-center gap-2 text-text-main">
+                            <span class="material-symbols-outlined text-primary">source</span>
+                            原视频源
+                        </h3>
+                        <span
+                            class="bg-green-50 text-green-600 text-xs px-2 py-1 rounded font-medium border border-green-200">已加载</span>
+                    </div>
+                    <div class="p-4">
+                        <div
+                            class="relative w-full aspect-video max-h-48 bg-gray-100 rounded-xl overflow-hidden group border border-border flex items-center justify-center">
+                            <img class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                data-alt="Video thumbnail showing abstract data waves"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUfFTxmberPqE3AMKbkNwQDizjurcmgAT2vIeUxAclfl6sKVLQpfrY3cSUfXVGuMDVq9Mkp-C9gMaCH0zF1_wF2G_Kx3vHVzCQocGc068PVoEHx09oQRnruUPGHhJm4LuFSC2-qk9UgBn8FGyWoLtQJKKmnloO7hjlbTzg7WPF9kxN_AJWy_KV-xlji5h1FJalzM6tdpW9aYbz0f6mzoGvjY8rpQSAhYvMD4u9rCG6JoR7yBFj6oiiVMfldy6G7Jr6IQo5xzjNSw8" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <button
+                                    class="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 hover:scale-105 transition-transform group-hover:bg-primary group-hover:border-primary shadow-lg">
+                                    <span
+                                        class="material-symbols-outlined text-white text-[32px] ml-1 fill-current">play_arrow</span>
+                                </button>
+                            </div>
+                            <div
+                                class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                                <div class="flex items-center justify-between text-xs font-medium text-white mb-2">
+                                    <span>00:34</span>
+                                    <span>02:15</span>
+                                </div>
+                                <div class="w-full h-1 bg-white/30 rounded-full overflow-hidden">
+                                    <div class="h-full w-1/4 bg-primary rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex gap-3 pb-6">
+                            <button
+                                class="flex-1 h-11 bg-primary hover:bg-primary-hover text-white rounded-xl flex items-center justify-center gap-2 font-bold shadow-md shadow-primary/20 transition-all active:scale-95">
+                                <span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+                                智能拆解 (Deconstruct)
+                            </button>
+                            <button
+                                class="shrink-0 h-11 w-11 border border-border rounded-xl flex items-center justify-center hover:bg-surface-secondary transition-colors text-text-secondary bg-white shadow-sm">
+                                <span class="material-symbols-outlined">upload</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-4">
+                    <h3 class="font-bold px-1 text-sm text-text-tertiary uppercase tracking-wider">提取元素 (Extracted
+                        Elements)</h3>
+                    <div
+                        class="bg-surface p-4 rounded-xl border border-border group hover:border-primary/50 transition-colors cursor-pointer shadow-card hover:shadow-soft">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 rounded-lg bg-orange-50 text-orange-500 border border-orange-100">
+                                    <span class="material-symbols-outlined text-[18px]">psychology</span>
+                                </div>
+                                <span class="font-semibold text-sm text-text-main">黄金前3秒 (Hook)</span>
+                            </div>
+                            <span
+                                class="text-xs text-orange-600 font-mono bg-orange-50 px-2 py-0.5 rounded border border-orange-100">98%
+                                匹配度</span>
+                        </div>
+                        <p class="text-sm text-text-secondary line-clamp-2 pl-9">
+                            "如果你还在手动写文案，那么你已经out了。今天教你如何用AI在这个月多赚..."
+                        </p>
+                    </div>
+                    <div
+                        class="bg-surface p-4 rounded-xl border border-border group hover:border-primary/50 transition-colors cursor-pointer shadow-card hover:shadow-soft">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 rounded-lg bg-blue-50 text-blue-500 border border-blue-100">
+                                    <span class="material-symbols-outlined text-[18px]">article</span>
+                                </div>
+                                <span class="font-semibold text-sm text-text-main">脚本结构 (Structure)</span>
+                            </div>
+                            <span
+                                class="text-xs text-blue-600 font-mono bg-blue-50 px-2 py-0.5 rounded border border-blue-100">痛点-方案-证明-行动</span>
+                        </div>
+                        <div class="pl-9 flex gap-2">
+                            <span
+                                class="px-2 py-1 bg-surface-secondary rounded text-xs text-text-secondary border border-border">痛点引入</span>
+                            <span
+                                class="material-symbols-outlined text-xs text-text-tertiary self-center">arrow_forward</span>
+                            <span
+                                class="px-2 py-1 bg-surface-secondary rounded text-xs text-text-secondary border border-border">数据展示</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface p-4 rounded-xl border border-border group hover:border-primary/50 transition-colors cursor-pointer shadow-card hover:shadow-soft">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 rounded-lg bg-purple-50 text-purple-500 border border-purple-100">
+                                    <span class="material-symbols-outlined text-[18px]">palette</span>
+                                </div>
+                                <span class="font-semibold text-sm text-text-main">视觉风格 (Visual)</span>
+                            </div>
+                        </div>
+                        <div class="pl-9 flex flex-wrap gap-2">
+                            <span
+                                class="px-2 py-1 rounded-full bg-purple-50 text-purple-600 text-xs border border-purple-100">快节奏剪辑</span>
+                            <span
+                                class="px-2 py-1 rounded-full bg-purple-50 text-purple-600 text-xs border border-purple-100">高对比字幕</span>
+                            <span
+                                class="px-2 py-1 rounded-full bg-purple-50 text-purple-600 text-xs border border-purple-100">科技感滤镜</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-1 flex flex-col items-center py-12 relative">
+                <div class="absolute top-0 bottom-0 w-px bg-border z-0"></div>
+                <div
+                    class="w-8 h-8 rounded-full bg-surface border-2 border-primary z-10 flex items-center justify-center mb-16 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                    <span class="material-symbols-outlined text-primary text-[16px]">download</span>
+                </div>
+                <div
+                    class="w-8 h-8 rounded-full bg-surface border-2 border-primary z-10 flex items-center justify-center mb-16 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                    <span class="material-symbols-outlined text-primary text-[16px]">account_tree</span>
+                </div>
+                <div class="w-1 h-16 bg-gradient-to-b from-primary to-transparent mb-16 z-10 animate-pulse"></div>
+                <div
+                    class="w-8 h-8 rounded-full bg-primary text-white z-10 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </div>
+            </div>
+            <div class="col-span-6 flex flex-col gap-6 h-full overflow-hidden">
+                <div class="bg-surface rounded-2xl border border-border h-full flex flex-col shadow-card">
+                    <div class="flex border-b border-border bg-gray-50/50">
+                        <button id="video-tab-script" onclick="switchVideoView('script')"
+                            class="px-6 py-4 text-sm font-bold border-b-2 border-primary text-primary bg-primary/5 transition-colors">
+                            仿写脚本 (Script)
+                        </button>
+                        <button id="video-tab-storyboard" onclick="switchVideoView('storyboard')"
+                            class="px-6 py-4 text-sm font-medium text-text-secondary hover:text-text-main transition-colors border-b-2 border-transparent hover:bg-surface-secondary/50">
+                            分镜预览 (Storyboard)
+                        </button>
+                        <button
+                            class="px-6 py-4 text-sm font-medium text-text-secondary hover:text-text-main transition-colors border-b-2 border-transparent hover:bg-surface-secondary/50">
+                            设置 (Settings)
+                        </button>
+                        <div class="ml-auto flex items-center px-4 gap-2">
+                            <button
+                                class="text-xs flex items-center gap-1 text-text-secondary hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">history</span>
+                                历史版本
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white">
+
+                        <!-- Script Content -->
+                        <div id="video-content-script">
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex gap-3">
+                                <span class="material-symbols-outlined text-primary mt-0.5">stars</span>
+                                <div>
+                                    <h4 class="text-sm font-bold text-text-main mb-1">AI 优化建议</h4>
+                                    <p class="text-sm text-text-secondary">根据您的产品特点，AI 将原视频中的“效率痛点”调整为了“成本痛点”，预期完播率提升
+                                        15%。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div
+                                    class="relative pl-6 border-l-2 border-border hover:border-primary transition-colors group">
+                                    <div
+                                        class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-surface border-2 border-text-tertiary group-hover:border-primary transition-colors">
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-text-secondary uppercase">00:00 - 00:05 |
+                                            黄金开场</span>
+                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">refresh</span></button>
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">edit</span></button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base text-text-main leading-relaxed font-body">
+                                        如果你还在为高昂的营销费用发愁，那么这条视频可能会帮你省下一辆跑车钱。今天揭秘低成本获客的黑科技...
+                                    </p>
+                                </div>
+                                <div
+                                    class="relative pl-6 border-l-2 border-border hover:border-primary transition-colors group">
+                                    <div
+                                        class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-surface border-2 border-text-tertiary group-hover:border-primary transition-colors">
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-text-secondary uppercase">00:05 - 00:15 |
+                                            核心展示</span>
+                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">refresh</span></button>
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">edit</span></button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base text-text-main leading-relaxed font-body">
+                                        看这里，这是我们传统的投放数据，单次点击高达20元。但是使用了我们的AI仿写工具后，数据发生了惊人的逆转...
+                                    </p>
+                                </div>
+                                <div
+                                    class="relative pl-6 border-l-2 border-border hover:border-primary transition-colors group">
+                                    <div
+                                        class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-surface border-2 border-text-tertiary group-hover:border-primary transition-colors">
+                                    </div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-text-secondary uppercase">00:15 - 00:25 |
+                                            信任背书</span>
+                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">refresh</span></button>
+                                            <button
+                                                class="p-1 hover:bg-surface-secondary rounded text-text-secondary hover:text-primary"><span
+                                                    class="material-symbols-outlined text-[16px]">edit</span></button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base text-text-main leading-relaxed font-body">
+                                        不只是我，连行业Top 10的玩家都在偷偷使用这套逻辑。数据不会骗人，转化率直接提升了300%。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-8 text-primary animate-pulse">
+                                <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                                <span class="text-xs font-medium">AI 正在撰写结尾行动号召 (Call to Action)...</span>
+                            </div>
+                        </div>
+
+                        <!-- Storyboard Content (Hidden by default) -->
+                        <div id="video-content-storyboard" class="hidden space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Scene 1 -->
+                                <div
+                                    class="border border-border rounded-xl overflow-hidden shadow-sm group hover:border-primary/50 transition-colors">
+                                    <div class="aspect-video bg-surface relative">
+                                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400"
+                                            class="w-full h-full object-cover">
+                                        <div
+                                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                class="bg-white/90 text-text-main px-3 py-1.5 rounded-lg text-xs font-semibold">重新生成画面</button>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 bg-white">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span
+                                                class="text-xs font-bold bg-surface-secondary px-2 py-0.5 rounded text-text-main">场景
+                                                1 (00:00 - 00:05)</span>
+                                            <span class="text-xs text-text-secondary">#近景 #惊讶</span>
+                                        </div>
+                                        <p class="text-sm text-text-main">主播手持账单，眉头紧锁，随后画面快速闪过一组红色的下跌数据...</p>
+                                    </div>
+                                </div>
+
+                                <!-- Scene 2 -->
+                                <div
+                                    class="border border-border rounded-xl overflow-hidden shadow-sm group hover:border-primary/50 transition-colors">
+                                    <div class="aspect-video bg-surface relative">
+                                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400"
+                                            class="w-full h-full object-cover">
+                                        <div
+                                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                class="bg-white/90 text-text-main px-3 py-1.5 rounded-lg text-xs font-semibold">重新生成画面</button>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 bg-white">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span
+                                                class="text-xs font-bold bg-surface-secondary px-2 py-0.5 rounded text-text-main">场景
+                                                2 (00:05 - 00:15)</span>
+                                            <span class="text-xs text-text-secondary">#大屏展示 #上升趋势</span>
+                                        </div>
+                                        <p class="text-sm text-text-main">画面平滑切入数据驾驶舱，蓝色线段高速上升，屏幕显示ROI提升300%...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Static placeholder for fetching more generated scenes -->
+                            <div
+                                class="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-text-tertiary">
+                                <span
+                                    class="material-symbols-outlined text-[32px] mb-2 animate-bounce">movie_creation</span>
+                                <span class="text-sm font-medium">AI 正在继续生成后续分镜...</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div
+                        class="p-4 border-t border-border bg-gray-50/50 flex justify-between items-center rounded-b-2xl">
+                        <div class="flex gap-2">
+                            <span class="text-xs text-text-secondary">字数: 324</span>
+                            <span class="text-xs text-text-secondary">预计时长: 45s</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <button
+                                class="px-4 py-2 rounded-lg border border-border bg-white text-sm font-medium hover:bg-surface-secondary text-text-main transition-colors shadow-sm">
+                                复制文案
+                            </button>
+                            <button
+                                class="px-4 py-2 rounded-lg bg-text-main text-white text-sm font-bold hover:bg-text-main/90 transition-colors flex items-center gap-2 shadow-lg">
+                                <span class="material-symbols-outlined text-[18px]">movie_filter</span>
+                                生成视频
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article Creation View (Hidden by default) -->
+        <div id="view-article" class="flex-1 overflow-hidden p-6 grid grid-cols-12 gap-6 hidden">
+            <!-- Left Side: Source Material -->
+            <div class="col-span-4 flex flex-col gap-6 h-full">
+                <!-- Source Input -->
+                <div class="bg-surface rounded-2xl border border-border shadow-card p-5">
+                    <h3 class="font-bold flex items-center gap-2 text-text-main mb-4">
+                        <span class="material-symbols-outlined text-primary">link</span>
+                        资料提取
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="粘贴公众号文章、知乎回答等链接..."
+                                class="flex-1 bg-surface-secondary border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors">
+                            <button
+                                class="bg-surface-secondary hover:bg-border text-text-main px-4 py-2.5 rounded-xl transition-colors shrink-0">
+                                解析 (Parse)
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-text-secondary">
+                            <span class="flex-1 h-px bg-border"></span>
+                            或者是
+                            <span class="flex-1 h-px bg-border"></span>
+                        </div>
+                        <div
+                            class="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center text-center hover:border-primary/50 cursor-pointer">
+                            <span class="material-symbols-outlined text-text-secondary mb-2">upload_file</span>
+                            <span class="text-sm font-medium text-text-main">上传 PDF / Word 文档</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extracted Highlights -->
+                <div class="flex-1 flex flex-col gap-4">
+                    <h3 class="font-bold px-1 text-sm text-text-tertiary uppercase tracking-wider">提取核心要素 (Highlights)
+                    </h3>
+
+                    <div class="bg-surface p-4 rounded-xl border border-border group shadow-card">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-orange-500 text-[18px]">campaign</span>
+                            <span class="font-semibold text-sm text-text-main">核心论点</span>
+                        </div>
+                        <p class="text-sm text-text-secondary pl-6 border-l-2 border-orange-200 ml-2">
+                            人工智能重塑图文创作流，不再是单纯的代写，而是充当副驾驶（Copilot）角色。
+                        </p>
+                    </div>
+
+                    <div class="bg-surface p-4 rounded-xl border border-border group shadow-card">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-blue-500 text-[18px]">format_quote</span>
+                            <span class="font-semibold text-sm text-text-main">金句摘录</span>
+                        </div>
+                        <p class="text-sm text-text-secondary pl-6 border-l-2 border-blue-200 ml-2 italic">
+                            “未来的创作者不是被AI淘汰，而是被熟练使用AI的人淘汰。”
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Divider -->
+            <div class="col-span-1 flex flex-col items-center py-12 relative">
+                <div class="absolute top-0 bottom-0 w-px bg-border z-0"></div>
+                <div
+                    class="w-8 h-8 rounded-full bg-surface border-2 border-primary z-10 flex items-center justify-center mb-16 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                    <span class="material-symbols-outlined text-primary text-[16px]">transform</span>
+                </div>
+                <div class="w-1 h-16 bg-gradient-to-b from-primary to-transparent mb-16 z-10 animate-pulse"></div>
+                <div
+                    class="w-8 h-8 rounded-full bg-primary text-white z-10 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Editor -->
+            <div class="col-span-7 flex flex-col gap-6 h-full overflow-hidden">
+                <div class="bg-surface rounded-2xl border border-border h-full flex flex-col shadow-card">
+                    <div class="flex border-b border-border bg-gray-50/50 justify-between items-center pr-4">
+                        <div class="flex">
+                            <button
+                                class="px-6 py-4 text-sm font-bold border-b-2 border-primary text-primary bg-primary/5">
+                                小红书笔记风
+                            </button>
+                            <button class="px-6 py-4 text-sm font-medium text-text-secondary hover:text-text-main">
+                                微信公众号长文
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                class="px-3 py-1.5 rounded-lg border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-white text-xs font-bold flex items-center gap-1 transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+                                一键 AI 润色
+                            </button>
+                            <span class="w-px h-6 bg-border mx-1 self-center"></span>
+                            <button class="p-1.5 rounded hover:bg-border text-text-secondary" title="插入图片">
+                                <span class="material-symbols-outlined text-[18px]">image</span>
+                            </button>
+                            <button class="p-1.5 rounded hover:bg-border text-text-secondary" title="排版优化">
+                                <span class="material-symbols-outlined text-[18px]">format_align_left</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Editor Area -->
+                    <div class="flex-1 p-8 overflow-y-auto">
+                        <h1 class="text-2xl font-bold mb-6 text-text-main" contenteditable="true">
+                            不敢想象！2026年的内容创作竟然变成这样了🤯</h1>
+                        <p class="text-text-main leading-relaxed mb-4" contenteditable="true">
+                            家人们！今天必须来狠狠分享一波这款封神的 AI 内容创作台！🔥
+                        </p>
+                        <p class="text-text-main leading-relaxed mb-4" contenteditable="true">
+                            之前每次写笔记都要痛不欲生地扒爆款、拆结构、想破脑袋憋金句。但是今天体验了这个全新的「灵感仿写」功能，我直接一个大震惊！这不再是那种干巴巴的呆板写作，而是真正的
+                            Copilot（副驾驶）！🤖
+                        </p>
+                        <div
+                            class="bg-surface-secondary rounded-xl p-4 my-4 flex justify-between items-center border border-border">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-text-secondary text-[24px]">image</span>
+                                <span class="text-sm text-text-secondary">配图占位：AI 生成的插画</span>
+                            </div>
+                            <button
+                                class="text-xs bg-white border border-border px-3 py-1.5 rounded-lg font-medium text-text-main">生成配图</button>
+                        </div>
+                        <p class="text-text-main leading-relaxed mb-4" contenteditable="true">
+                            正如圈内那句著名的话：<span
+                                class="bg-yellow-100 text-yellow-800 px-1 rounded">未来的创作者不是被AI淘汰，而是被熟练使用AI的人淘汰。</span>
+                            确实如此！
+                        </p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="p-4 border-t border-border flex justify-between items-center">
+                        <div class="flex gap-4">
+                            <span class="text-xs text-text-secondary">字数: 845</span>
+                            <span class="text-xs text-text-secondary">阅读耗时: ~2分钟</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <button
+                                class="px-5 py-2 rounded-lg border border-border bg-white text-sm font-medium hover:bg-surface-secondary text-text-main transition-colors shadow-sm">
+                                一键排版
+                            </button>
+                            <button
+                                class="px-5 py-2 rounded-lg bg-text-main text-white text-sm font-bold hover:bg-text-main/90 transition-colors flex items-center gap-2 shadow-lg">
+                                <span class="material-symbols-outlined text-[18px]">publish</span>
+                                推送发布
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function switchVideoView(view) {
+                // Determine classes for active and inactive tabs
+                const activeTabClasses = 'px-6 py-4 text-sm font-bold border-b-2 border-primary text-primary bg-primary/5 transition-colors';
+                const inactiveTabClasses = 'px-6 py-4 text-sm font-medium text-text-secondary hover:text-text-main transition-colors border-b-2 border-transparent hover:bg-surface-secondary/50';
+
+                // Update tab styles
+                if (view === 'script') {
+                    document.getElementById('video-tab-script').className = activeTabClasses;
+                    document.getElementById('video-tab-storyboard').className = inactiveTabClasses;
+
+                    document.getElementById('video-content-script').classList.remove('hidden');
+                    document.getElementById('video-content-storyboard').classList.add('hidden');
+                } else if (view === 'storyboard') {
+                    document.getElementById('video-tab-script').className = inactiveTabClasses;
+                    document.getElementById('video-tab-storyboard').className = activeTabClasses;
+
+                    document.getElementById('video-content-script').classList.add('hidden');
+                    document.getElementById('video-content-storyboard').classList.remove('hidden');
+                }
+            }
+        </script>
+
+        <!-- Floating Progress for Video -->
+        <div id="video-progress"
+            class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md border border-border text-text-main px-6 py-3 rounded-full shadow-2xl z-20 flex items-center gap-6">
+            <div class="flex items-center gap-2 text-primary">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-xs font-bold">处理中</span>
+            </div>
+            <div class="flex items-center gap-2 text-text-tertiary">
+                <span class="material-symbols-outlined text-[16px]">download</span>
+                <span class="text-xs">提取</span>
+            </div>
+            <span class="w-4 h-[1px] bg-border"></span>
+            <div class="flex items-center gap-2 font-medium text-text-main">
+                <span class="material-symbols-outlined text-[16px]">psychology</span>
+                <span class="text-xs">重写</span>
+            </div>
+            <span class="w-4 h-[1px] bg-border"></span>
+            <div class="flex items-center gap-2 text-text-tertiary">
+                <span class="material-symbols-outlined text-[16px]">video_library</span>
+                <span class="text-xs">合成</span>
+            </div>
+        </div>
+        </div>
+
+        <script>
+            function switchMode(mode) {
+                // Update views
+                document.getElementById('view-video').classList.add('hidden');
+                document.getElementById('view-article').classList.add('hidden');
+
+                // Hide video progress if not in video mode
+                const progress = document.getElementById('video-progress');
+                if (mode === 'video') {
+                    document.getElementById('view-video').classList.remove('hidden');
+                    progress.classList.remove('hidden');
+                    progress.classList.add('lg:flex');
+                } else {
+                    document.getElementById(`view-${mode}`).classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    progress.classList.remove('lg:flex');
+                }
+            }
+
+            // Read the initial mode from the URL parameter, default to video
+            window.addEventListener('DOMContentLoaded', () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode') || 'video';
+                switchMode(mode);
+            });
+        </script>
+    </main>
+</body>
+
+</html>

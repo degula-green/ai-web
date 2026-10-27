@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>任务批处理与发布计划表</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563EB",
+                        "primary-hover": "#1D4ED8",
+                        "background": "#F8F9FA",
+                        "surface": "#FFFFFF",
+                        "surface-secondary": "#F1F5F9",
+                        "border": "#E2E8F0",
+                        "text-main": "#1E293B",
+                        "text-secondary": "#64748B",
+                        "text-tertiary": "#94A3B8",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Noto Sans", sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: "Space Grotesk", sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-text-main min-h-screen overflow-hidden flex antialiased selection:bg-primary/20 selection:text-primary">
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-background">
+        <header
+            class="h-16 border-b border-border bg-surface/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold tracking-tight text-text-main">任务批处理与发布计划表</h2>
+                <p class="text-xs text-text-secondary">AI自动化排期与多平台分发管理</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="scheduleSummaryBadge"
+                    class="flex items-center gap-2 bg-surface-secondary px-3 py-1.5 rounded-lg border border-border/50">
+                    <span class="material-symbols-outlined text-primary text-[20px]">schedule</span>
+                    <span class="text-sm font-medium text-text-main">待发布任务: 12</span>
+                </div>
+                <button onclick="window.parent.postMessage('openNewPlanModal', '*')"
+                    class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-[20px]">add</span>
+                    新建计划
+                </button>
+            </div>
+        </header>
+        <div class="flex-1 overflow-hidden p-6 grid grid-cols-12 gap-6">
+            <div class="col-span-8 lg:col-span-9 flex flex-col gap-6 h-full overflow-hidden">
+                <div class="bg-surface rounded-2xl border border-border flex flex-col shadow-card h-full">
+                    <div class="p-4 border-b border-border/50 flex justify-between items-center bg-gray-50/50">
+                        <div class="flex items-center gap-4">
+                            <h3 class="font-bold text-lg text-text-main">2023年 10月</h3>
+                            <div class="flex gap-1">
+                                <button id="schedulePrevMonthButton" class="p-1 hover:bg-surface-secondary rounded text-text-secondary"><span
+                                        class="material-symbols-outlined">chevron_left</span></button>
+                                <button id="scheduleNextMonthButton" class="p-1 hover:bg-surface-secondary rounded text-text-secondary"><span
+                                        class="material-symbols-outlined">chevron_right</span></button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                class="px-3 py-1 text-xs font-medium bg-white border border-border rounded-md text-text-secondary hover:text-primary">周视图</button>
+                            <button
+                                class="px-3 py-1 text-xs font-medium bg-primary/10 border border-primary/20 rounded-md text-primary">月视图</button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 overflow-y-auto custom-scrollbar bg-white">
+                        <div id="scheduleCalendarGrid"
+                            class="grid grid-cols-7 gap-px bg-border border border-border rounded-lg overflow-hidden h-full">
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周日
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周一
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周二
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周三
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周四
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周五
+                            </div>
+                            <div class="bg-surface-secondary p-2 text-center text-xs font-bold text-text-secondary">周六
+                            </div>
+                            <div class="bg-white min-h-[100px] p-2 flex flex-col gap-1 opacity-40">
+                                <span class="text-xs font-medium text-text-tertiary">29</span>
+                            </div>
+                            <div class="bg-white min-h-[100px] p-2 flex flex-col gap-1 opacity-40">
+                                <span class="text-xs font-medium text-text-tertiary">30</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">1</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">2</span>
+                                <div
+                                    class="bg-red-50 border border-red-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    <span class="text-[10px] font-medium text-red-700 truncate">小红书: 新品种草...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">3</span>
+                                <div
+                                    class="bg-black/5 border border-black/10 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                                    <span class="text-[10px] font-medium text-text-main truncate">抖音: 剧情反转...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">4</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">5</span>
+                                <div
+                                    class="bg-blue-50 border border-blue-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    <span class="text-[10px] font-medium text-blue-700 truncate">B站: 深度测评...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">6</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">7</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">8</span>
+                                <div
+                                    class="bg-red-50 border border-red-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    <span class="text-[10px] font-medium text-red-700 truncate">小红书: 穿搭分享...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">9</span>
+                                <div
+                                    class="bg-black/5 border border-black/10 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                                    <span class="text-[10px] font-medium text-text-main truncate">抖音: 搞笑日常...</span>
+                                </div>
+                                <div
+                                    class="bg-blue-50 border border-blue-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    <span class="text-[10px] font-medium text-blue-700 truncate">视频号: 知识科普...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors bg-primary/5">
+                                <span
+                                    class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shadow-md shadow-primary/20">10</span>
+                                <div
+                                    class="bg-orange-50 border border-orange-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow border-l-2 border-l-orange-400">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                                    <span class="text-[10px] font-medium text-orange-700 truncate">快手: 直播预告...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">11</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">12</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">13</span>
+                                <div
+                                    class="bg-red-50 border border-red-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    <span class="text-[10px] font-medium text-red-700 truncate">小红书: 周末探店...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">14</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">15</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">16</span>
+                                <div
+                                    class="bg-black/5 border border-black/10 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                                    <span class="text-[10px] font-medium text-text-main truncate">抖音: 情感语录...</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">17</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">18</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">19</span>
+                                <div
+                                    class="bg-purple-50 border border-purple-100 p-1.5 rounded flex items-center gap-1.5 cursor-pointer hover:shadow-sm transition-shadow">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                    <span class="text-[10px] font-medium text-purple-700 truncate">Instagram:
+                                        Story更新</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">20</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">21</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">22</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">23</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">24</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">25</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">26</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">27</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">28</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">29</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">30</span>
+                            </div>
+                            <div
+                                class="bg-white min-h-[100px] p-2 flex flex-col gap-1 group hover:bg-surface-secondary/30 transition-colors">
+                                <span class="text-xs font-bold text-text-main">31</span>
+                            </div>
+                            <div class="bg-white min-h-[100px] p-2 flex flex-col gap-1 opacity-40">
+                                <span class="text-xs font-medium text-text-tertiary">1</span>
+                            </div>
+                            <div class="bg-white min-h-[100px] p-2 flex flex-col gap-1 opacity-40">
+                                <span class="text-xs font-medium text-text-tertiary">2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-4 lg:col-span-3 flex flex-col h-full gap-6">
+                <div class="bg-surface rounded-2xl border border-border flex flex-col shadow-card h-full">
+                    <div class="p-4 border-b border-border/50 bg-gray-50/50 flex justify-between items-center">
+                        <h3 class="font-bold flex items-center gap-2 text-text-main text-sm">
+                            <span class="material-symbols-outlined text-orange-500 text-[18px]">pending_actions</span>
+                            待发布队列 (Pending)
+                        </h3>
+                        <span id="schedulePendingCountBadge"
+                            class="bg-surface-secondary text-text-secondary text-xs px-2 py-1 rounded font-medium border border-border">5
+                            items</span>
+                    </div>
+                    <div id="schedulePendingList" class="flex-1 p-4 overflow-y-auto custom-scrollbar flex flex-col gap-3">
+                        <div
+                            class="bg-white p-3 rounded-xl border border-border hover:border-primary/50 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all group relative">
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-text-tertiary hover:text-primary"><span
+                                        class="material-symbols-outlined text-[16px]">drag_indicator</span></button>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-border">
+                                    <img class="w-full h-full object-cover"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUfFTxmberPqE3AMKbkNwQDizjurcmgAT2vIeUxAclfl6sKVLQpfrY3cSUfXVGuMDVq9Mkp-C9gMaCH0zF1_wF2G_Kx3vHVzCQocGc068PVoEHx09oQRnruUPGHhJm4LuFSC2-qk9UgBn8FGyWoLtQJKKmnloO7hjlbTzg7WPF9kxN_AJWy_KV-xlji5h1FJalzM6tdpW9aYbz0f6mzoGvjY8rpQSAhYvMD4u9rCG6JoR7yBFj6oiiVMfldy6G7Jr6IQo5xzjNSw8" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span
+                                            class="bg-black text-white text-[10px] px-1.5 py-0.5 rounded font-medium">抖音</span>
+                                        <span
+                                            class="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">Ready</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-text-main line-clamp-2 leading-tight mb-2">
+                                        AI工具效率评测：这5款工具真的好用吗？...</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-text-tertiary flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                            未排期
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white p-3 rounded-xl border border-border hover:border-primary/50 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all group relative">
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-text-tertiary hover:text-primary"><span
+                                        class="material-symbols-outlined text-[16px]">drag_indicator</span></button>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-16 h-16 rounded-lg bg-red-50 flex-shrink-0 overflow-hidden border border-border flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-red-300 text-[24px]">image</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span
+                                            class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">小红书</span>
+                                        <span
+                                            class="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">Ready</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-text-main line-clamp-2 leading-tight mb-2">
+                                        周末去哪儿？上海必打卡的3家咖啡馆...</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-text-tertiary flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                            未排期
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white p-3 rounded-xl border border-border hover:border-primary/50 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all group relative">
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-text-tertiary hover:text-primary"><span
+                                        class="material-symbols-outlined text-[16px]">drag_indicator</span></button>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-16 h-16 rounded-lg bg-blue-50 flex-shrink-0 overflow-hidden border border-border flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-blue-300 text-[24px]">videocam</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span
+                                            class="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">B站</span>
+                                        <span
+                                            class="text-[10px] text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">审核中</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-text-main line-clamp-2 leading-tight mb-2">
+                                        硬核干货：从零开始学习Python编程...</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-text-tertiary flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">schedule</span>
+                                            未排期
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white p-3 rounded-xl border border-border hover:border-primary/50 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all group relative opacity-60">
+                            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="text-text-tertiary hover:text-primary"><span
+                                        class="material-symbols-outlined text-[16px]">drag_indicator</span></button>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-border">
+                                    <div class="w-full h-full bg-gray-200 animate-pulse"></div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span
+                                            class="bg-gray-500 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">多平台</span>
+                                        <span
+                                            class="text-[10px] text-text-tertiary bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">Draft</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-text-main line-clamp-2 leading-tight mb-2">未命名草稿
+                                        #20231024...</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-text-tertiary flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[12px]">edit</span>
+                                            编辑中
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-border bg-gray-50/50">
+                        <button
+                            class="w-full py-2.5 rounded-xl border border-dashed border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                            导入更多内容
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>分发内容页 - 工作流系统</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 原始仪表盘色板
+                        "primary": "#2563eb",
+                        "primary-light": "#eff6ff",
+                        "primary-dark": "#1e40af",
+                        "secondary": "#475569",
+                        "surface-highlight": "#f1f5f9",
+                        "surface-accent": "#e2e8f0",
+                        "text-primary": "#1e293b",
+                        "text-secondary": "#64748b",
+                        "background-light": "#f8fafc",
+                        "background-sidebar": "#f0f9ff",
+                        // 表单新增色板 (兼容您提供的父级配置)
+                        "primary-hover": "#1D4ED8",
+                        "background": "#F8F9FA",
+                        "surface": "#FFFFFF",
+                        "surface-secondary": "#F1F5F9",
+                        "border": "#E2E8F0",
+                        "text-main": "#1E293B",
+                        "text-tertiary": "#94A3B8",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans SC", "sans-serif"],
+                        "sans": ["Noto Sans SC", "sans-serif"],
+                    },
+                    boxShadow: {
+                        "card": "0 2px 10px -2px rgba(148, 163, 184, 0.15), 0 1px 4px -1px rgba(148, 163, 184, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+        }
+
+        .font-display {
+            font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light text-text-primary min-h-screen flex flex-col relative">
+
+    <main class="flex flex-1 bg-background-light">
+        <div class="flex-1 flex flex-col p-6 gap-6">
+            <div class="flex justify-between items-end shrink-0">
+                <div>
+                    <h1 class="text-2xl font-bold text-text-main font-display">分发内容管理</h1>
+                    <p class="text-text-secondary text-sm mt-1">管理各平台内容分发状态，点击查看效果与配置排期。</p>
+                </div>
+            </div>
+
+            <div
+                class="bg-surface rounded-xl border border-border shadow-card flex-1 flex flex-col min-h-[400px] overflow-hidden">
+                <div id="distributionToast"
+                    class="mx-5 mt-5 hidden items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-sm"></div>
+                <div
+                    class="p-5 border-b border-border flex justify-between items-center bg-surface-secondary/50 rounded-t-xl shrink-0">
+                    <h3 class="text-lg font-bold text-text-main font-display">分发内容列表</h3>
+                    <div class="flex gap-3 items-center relative">
+                        <button id="distributionRefreshButton"
+                            class="px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                            刷新抖音
+                        </button>
+                        <div class="relative">
+                            <input id="distributionKeywordInput"
+                                class="bg-surface border border-border rounded-lg text-xs px-3 py-2 pl-8 text-text-main w-56 placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                placeholder="搜索内容 ID..." type="text" />
+                            <span
+                                class="material-symbols-outlined absolute left-2 top-1.5 text-text-tertiary text-[16px]">search</span>
+                        </div>
+                        <button id="distributionQueryButton"
+                            class="text-text-secondary hover:text-primary transition-colors p-1.5 rounded hover:bg-surface-secondary">
+                            <span class="material-symbols-outlined text-[20px]">filter_list</span>
+                        </button>
+                        <div id="distributionFilterPanel"
+                            class="hidden absolute right-0 top-11 z-20 w-64 rounded-xl border border-border bg-surface p-3 shadow-card">
+                            <div class="flex flex-col gap-3">
+                                <select id="distributionPlatformSelect"
+                                    class="bg-surface border border-border rounded-lg text-xs px-3 py-2 text-text-main w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                                    <option value="">全部平台</option>
+                                    <option value="douyin">抖音</option>
+                                    <option value="xiaohongshu">小红书</option>
+                                    <option value="bilibili">Bilibili</option>
+                                    <option value="kuaishou">快手</option>
+                                </select>
+                                <select id="distributionStatusSelect"
+                                    class="bg-surface border border-border rounded-lg text-xs px-3 py-2 text-text-main w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                                    <option value="">全部状态</option>
+                                    <option value="published">已发布</option>
+                                    <option value="pending">待发布</option>
+                                </select>
+                                <div class="flex justify-end">
+                                    <button id="distributionApplyFilterButton"
+                                        class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors">
+                                        查询
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-auto flex-1">
+                    <table class="w-full text-left text-sm text-text-secondary">
+                        <thead
+                            class="bg-surface-secondary text-xs uppercase text-text-secondary font-semibold tracking-wide border-b border-border sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-3.5" scope="col">内容标题 / ID</th>
+                                <th class="px-6 py-3.5" scope="col">平台</th>
+                                <th class="px-6 py-3.5" scope="col">状态</th>
+                                <th class="px-6 py-3.5 text-right" scope="col">浏览量</th>
+                                <th class="px-6 py-3.5 text-center" scope="col">AI 评分</th>
+                                <th class="px-6 py-3.5 text-center" scope="col">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="distributionTableBody" class="divide-y divide-border">
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-text-secondary">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <aside
+            class="w-80 border-l border-border bg-background-sidebar flex flex-col overflow-hidden hidden xl:flex shadow-sm">
+            <div class="p-5 border-b border-blue-100 bg-blue-50/50">
+                <div class="flex items-center gap-3 mb-1">
+                    <div
+                        class="size-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-200">
+                        <span class="material-symbols-outlined text-white text-lg">smart_toy</span>
+                    </div>
+                    <h2 class="text-base font-bold text-text-main font-display">AI 分析洞察</h2>
+                </div>
+                <p class="text-xs text-text-secondary pl-11">关于分发内容的具体优化细节</p>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div
+                    class="p-4 rounded-xl bg-surface border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-2">
+                        <span
+                            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-50 text-amber-700 border border-amber-100 tracking-wider">High
+                            Priority</span>
+                        <span class="text-xs text-text-tertiary">刚刚</span>
+                    </div>
+                    <h4 class="text-sm font-bold text-text-main mb-2">视频开头过长</h4>
+                    <p class="text-xs text-text-secondary leading-relaxed mb-3.5">
+                        检测到 ID #VID-9920 在前 5 秒流失率达 40%。建议将 intro 缩短至 3 秒以内，并直接展示高潮片段。
+                    </p>
+                    <div class="flex gap-2">
+                        <button
+                            class="flex-1 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-semibold transition-colors">应用修改</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="contentDetailModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0"
+            id="detailModalBackdrop" onclick="closeContentDetailModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-3xl w-[90%] bg-surface shadow-2xl border border-border rounded-2xl transition-all duration-300 ease-out scale-95 opacity-0 flex flex-col max-h-[90vh]"
+            id="detailModalPanel">
+
+            <div
+                class="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-secondary/50 rounded-t-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20">
+                        <span class="material-symbols-outlined text-[24px]">analytics</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-text-main font-display" id="modalTitle">内容详情分析</h2>
+                        <span class="text-xs text-text-secondary font-mono" id="modalId">ID: #---</span>
+                    </div>
+                </div>
+                <button onclick="closeContentDetailModal()"
+                    class="p-2 text-text-secondary hover:text-text-main hover:bg-surface-secondary rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <section>
+                    <h3 class="text-sm font-bold text-text-main font-display mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">monitoring</span>
+                        核心数据表现
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-surface-secondary rounded-xl p-4 border border-border">
+                            <span
+                                class="text-xs text-text-secondary font-medium tracking-wide flex items-center gap-1.5 mb-1">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span> 浏览量 (Views)
+                            </span>
+                            <div class="text-2xl font-bold text-text-main font-display" id="modalViews">--</div>
+                        </div>
+                        <div class="bg-surface-secondary rounded-xl p-4 border border-border">
+                            <span
+                                class="text-xs text-text-secondary font-medium tracking-wide flex items-center gap-1.5 mb-1">
+                                <span class="material-symbols-outlined text-[14px]">favorite</span> 点赞量 (Likes)
+                            </span>
+                            <div class="text-2xl font-bold text-text-main font-display" id="modalLikes">--</div>
+                        </div>
+                        <div class="bg-surface-secondary rounded-xl p-4 border border-border">
+                            <span
+                                class="text-xs text-text-secondary font-medium tracking-wide flex items-center gap-1.5 mb-1">
+                                <span class="material-symbols-outlined text-[14px]">bookmark</span> 收藏量 (Saves)
+                            </span>
+                            <div class="text-2xl font-bold text-text-main font-display" id="modalSaves">--</div>
+                        </div>
+                        <div class="bg-surface-secondary rounded-xl p-4 border border-border">
+                            <span
+                                class="text-xs text-text-secondary font-medium tracking-wide flex items-center gap-1.5 mb-1">
+                                <span class="material-symbols-outlined text-[14px]">share</span> 转发量 (Shares)
+                            </span>
+                            <div class="text-2xl font-bold text-text-main font-display" id="modalShares">--</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-bold text-text-main font-display mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">psychology</span>
+                        AI 智能诊断
+                    </h3>
+                    <div class="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 bg-surface-secondary/50 border-b border-border flex items-start gap-3">
+                            <div class="p-1.5 bg-white rounded shadow-sm border border-border mt-0.5">
+                                <span class="material-symbols-outlined text-[18px] text-primary">tips_and_updates</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-text-main mb-1">表现亮点</h4>
+                                <p class="text-xs text-text-secondary leading-relaxed">该内容在前 3 秒的留存率极高，远超大盘同类内容
+                                    25%。主要是因为开头抛出的冲突点成功抓住了用户注意力。</p>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-surface flex items-start gap-3 border-b border-border">
+                            <div class="p-1.5 bg-amber-50 rounded shadow-sm border border-amber-100 mt-0.5">
+                                <span class="material-symbols-outlined text-[18px] text-amber-600">warning</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-text-main mb-1">优化建议</h4>
+                                <p class="text-xs text-text-secondary leading-relaxed">完播后转化率 (转化/播放) 仅为
+                                    1.2%，较低。建议在视频结尾加强明确的行动号召 (CTA)，或在评论区置顶购买链接。</p>
+                            </div>
+                        </div>
+                        <div class="bg-surface-secondary/30 p-4 flex items-center justify-between">
+                            <span class="text-xs font-bold text-text-secondary flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">analytics</span> AI 综合评估
+                            </span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-32 h-2 bg-border rounded-full overflow-hidden">
+                                    <div id="modalScoreBar"
+                                        class="h-full bg-primary transition-all duration-500 rounded-full"
+                                        style="width: 0%"></div>
+                                </div>
+                                <span class="text-sm font-bold text-text-main font-display"
+                                    id="modalScore">--/100</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="pb-2"></div>
+            </div>
+
+            <div class="p-4 border-t border-border bg-surface shrink-0 grid grid-cols-2 gap-3 rounded-b-2xl">
+                <button
+                    class="px-4 py-2.5 bg-surface-secondary hover:bg-border border border-border text-text-main rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">edit</span> 重新编辑
+                </button>
+                <button
+                    class="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 shadow-primary/20">
+                    <span class="material-symbols-outlined text-[18px]">psychology</span> 一键衍生优化版
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="scheduleModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0"
+            id="scheduleModalBackdrop" onclick="closeScheduleModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-surface shadow-2xl border border-border rounded-2xl transition-all duration-300 ease-out scale-95 opacity-0 flex flex-col max-h-[90vh]"
+            id="scheduleModalPanel">
+            <div
+                class="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-secondary/50 rounded-t-2xl shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-primary/10 text-primary rounded-lg border border-primary/20">
+                        <span class="material-symbols-outlined text-[24px]">calendar_month</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-text-main font-display">配置发布排期 (Schedule)</h2>
+                        <span id="scheduleContentId" class="text-xs text-text-secondary font-mono">ID: -</span>
+                    </div>
+                </div>
+                <button onclick="closeScheduleModal()"
+                    class="p-2 text-text-secondary hover:text-text-main hover:bg-surface-secondary rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <div>
+                    <label class="block text-sm font-semibold text-text-main mb-3">分发目标平台 <span
+                            class="text-text-secondary font-normal">(可多选)</span></label>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        <label class="cursor-pointer">
+                            <input id="schedulePlatformWechat" type="checkbox" class="peer sr-only">
+                            <div id="schedulePlatformCardWechat" data-platform-code="wechat"
+                                class="rounded-xl border-2 border-border p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-colors">
+                                <span class="material-symbols-outlined text-green-600">chat</span>
+                                <span class="text-xs font-bold text-text-main">B站</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input id="schedulePlatformXhs" type="checkbox" class="peer sr-only">
+                            <div id="schedulePlatformCardXhs" data-platform-code="xiaohongshu"
+                                class="rounded-xl border-2 border-border p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-colors">
+                                <span class="material-symbols-outlined text-red-500">auto_awesome</span>
+                                <span class="text-xs font-bold text-text-main">小红书</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input id="schedulePlatformDouyin" type="checkbox" class="peer sr-only">
+                            <div id="schedulePlatformCardDouyin" data-platform-code="douyin"
+                                class="rounded-xl border-2 border-border p-3 flex flex-col items-center gap-2 peer-checked:border-primary peer-checked:bg-primary/5 transition-colors">
+                                <span class="material-symbols-outlined text-slate-800">music_note</span>
+                                <span class="text-xs font-bold text-text-main">抖音</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input id="schedulePlatformKuaishou" type="checkbox" class="peer sr-only" disabled>
+                            <div id="schedulePlatformCardKuaishou" data-platform-code="kuaishou"
+                                class="rounded-xl border-2 border-border p-3 flex flex-col items-center gap-2 transition-colors opacity-50 cursor-not-allowed">
+                                <span class="material-symbols-outlined text-orange-600">movie</span>
+                                <span class="text-xs font-bold text-text-main">快手</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold text-text-main">发布文案 <span
+                                class="text-text-secondary font-normal">(Copywriting)</span></label>
+                    </div>
+                    <textarea id="scheduleCopywriting"
+                        class="w-full bg-surface-secondary border border-border rounded-lg px-4 py-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary text-text-main resize-none min-h-[100px] leading-relaxed"
+                        placeholder="在此输入或编辑您的发布内容..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-text-main mb-3">发布时间 <span
+                            class="text-text-secondary font-normal">(Publishing Time)</span></label>
+                    <div class="space-y-3">
+                        <label
+                            class="flex items-center p-3 border border-border rounded-xl cursor-pointer hover:bg-surface-secondary transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <div class="flex items-center h-5">
+                                <input name="publish_time" type="radio" value="ai"
+                                    class="w-4 h-4 text-primary bg-surface border-border focus:ring-primary" checked
+                                    onchange="toggleCustomTime(this.value)">
+                            </div>
+                            <div class="ml-3 flex flex-col flex-1">
+                                <span class="flex items-center gap-2 text-sm font-bold text-text-main">
+                                    AI推荐发布时间
+                                    <span id="scheduleAiBadge"
+                                        class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
+                                        <span class="material-symbols-outlined text-[10px]">auto_graph</span> 预计提升 20%
+                                        曝光
+                                    </span>
+                                </span>
+                                <span id="scheduleAiHint" class="text-xs text-text-secondary mt-0.5">暂无推荐时间</span>
+                            </div>
+                        </label>
+                        <label
+                            class="flex items-center p-3 border border-border rounded-xl cursor-pointer hover:bg-surface-secondary transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                            <div class="flex items-center h-5">
+                                <input name="publish_time" type="radio" value="custom"
+                                    class="w-4 h-4 text-primary bg-surface border-border focus:ring-primary"
+                                    onchange="toggleCustomTime(this.value)">
+                            </div>
+                            <div class="ml-3 flex flex-col">
+                                <span class="text-sm font-bold text-text-main">选择指定时间</span>
+                                <span class="text-xs text-text-secondary">自定义您希望对外发布的精准时间点</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="custom-time-picker-container"
+                        class="mt-4 p-4 border border-border rounded-xl bg-surface-secondary hidden transition-all duration-300">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-text-main mb-1.5">发布日期</label>
+                                <div class="relative">
+                                    <span
+                                        class="material-symbols-outlined absolute left-3 top-[9px] text-text-secondary text-[18px]">calendar_today</span>
+                                    <input id="scheduleDateInput" type="date"
+                                        class="w-full pl-9 pr-3 py-2 bg-surface border border-border rounded-lg text-sm text-text-main"
+                                        value="">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-text-main mb-1.5">具体时间</label>
+                                <div class="relative">
+                                    <span
+                                        class="material-symbols-outlined absolute left-3 top-[9px] text-text-secondary text-[18px]">schedule</span>
+                                    <input id="scheduleTimeInput" type="time"
+                                        class="w-full pl-9 pr-3 py-2 bg-surface border border-border rounded-lg text-sm text-text-main"
+                                        value="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="p-4 border-t border-border bg-surface shrink-0 flex justify-end gap-3 rounded-b-2xl shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+                <button onclick="closeScheduleModal()"
+                    class="px-5 py-2 hover:bg-surface-secondary text-text-secondary hover:text-text-main rounded-lg text-sm font-medium transition-colors border border-transparent hover:border-border">取消</button>
+                <button onclick="closeScheduleModal()"
+                    class="px-6 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">publish</span> 确认排期并发布
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 内容详情表单控制 ---
+        function openContentDetailModal(rowElement) {
+            const modal = document.getElementById('contentDetailModal');
+            const backdrop = document.getElementById('detailModalBackdrop');
+            const panel = document.getElementById('detailModalPanel');
+
+            // 如果是通过点击行触发的，动态读取该行的数据
+            if (rowElement) {
+                const title = rowElement.querySelector('.truncate')?.innerText || '内容详情分析';
+                const id = rowElement.querySelector('.font-mono')?.innerText || 'ID: #---';
+                const viewsStr = rowElement.querySelectorAll('td')[3]?.innerText.trim() || '--';
+                const scoreStr = rowElement.dataset.score || rowElement.querySelectorAll('td')[4]?.innerText.trim() || '--';
+                const likes = rowElement.dataset.likedCount || '--';
+                const shares = rowElement.dataset.shareCount || '--';
+
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalId').innerText = id;
+                document.getElementById('modalViews').innerText = viewsStr;
+                document.getElementById('modalLikes').innerText = likes === '--' ? '--' : Number(likes).toLocaleString();
+                document.getElementById('modalSaves').innerText = '--';
+                document.getElementById('modalShares').innerText = shares === '--' ? '--' : Number(shares).toLocaleString();
+
+                let scoreNum = parseInt(scoreStr, 10);
+                if (isNaN(scoreNum)) scoreNum = 0;
+                document.getElementById('modalScore').innerText = scoreNum > 0 ? `${scoreNum}/100` : '--/100';
+                setTimeout(() => {
+                    document.getElementById('modalScoreBar').style.width = scoreNum > 0 ? `${scoreNum}%` : '0%';
+                }, 50);
+            }
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Trigger reflow
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeContentDetailModal() {
+            const modal = document.getElementById('contentDetailModal');
+            const backdrop = document.getElementById('detailModalBackdrop');
+            const panel = document.getElementById('detailModalPanel');
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('scale-100', 'opacity-100');
+            panel.classList.add('scale-95', 'opacity-0');
+
+            // 重置进度条以便下次展示动画
+            document.getElementById('modalScoreBar').style.width = '0%';
+
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- 发布排期表单控制 ---
+        function setSchedulePlatformState(platformCode) {
+            const checkboxMap = {
+                wechat: {
+                    input: document.getElementById('schedulePlatformWechat'),
+                    card: document.getElementById('schedulePlatformCardWechat'),
+                },
+                xiaohongshu: {
+                    input: document.getElementById('schedulePlatformXhs'),
+                    card: document.getElementById('schedulePlatformCardXhs'),
+                },
+                douyin: {
+                    input: document.getElementById('schedulePlatformDouyin'),
+                    card: document.getElementById('schedulePlatformCardDouyin'),
+                },
+                kuaishou: {
+                    input: document.getElementById('schedulePlatformKuaishou'),
+                    card: document.getElementById('schedulePlatformCardKuaishou'),
+                },
+            };
+
+            Object.entries(checkboxMap).forEach(([key, config]) => {
+                const input = config.input;
+                const card = config.card;
+                if (!(input instanceof HTMLInputElement) || !(card instanceof HTMLElement)) {
+                    return;
+                }
+                const matched = key === platformCode;
+                const shouldDisable = !matched;
+                input.checked = matched;
+                input.disabled = shouldDisable;
+                card.classList.toggle('opacity-50', shouldDisable);
+                card.classList.toggle('cursor-not-allowed', shouldDisable);
+            });
+        }
+
+        function populateScheduleModal(rowElement) {
+            const contentId = rowElement?.dataset?.contentId || '-';
+            const title = rowElement?.dataset?.title || '';
+            const description = rowElement?.dataset?.description || '';
+            const platformCode = String(rowElement?.dataset?.platformCode || '').trim().toLowerCase();
+
+            const idElement = document.getElementById('scheduleContentId');
+            const copywritingElement = document.getElementById('scheduleCopywriting');
+            const aiHintElement = document.getElementById('scheduleAiHint');
+            const aiBadgeElement = document.getElementById('scheduleAiBadge');
+            const dateInput = document.getElementById('scheduleDateInput');
+            const timeInput = document.getElementById('scheduleTimeInput');
+
+            if (idElement) {
+                idElement.textContent = `ID: ${contentId}`;
+            }
+            if (copywritingElement instanceof HTMLTextAreaElement) {
+                copywritingElement.value = description || title || '';
+            }
+            if (aiHintElement) {
+                aiHintElement.textContent = '暂无推荐时间';
+            }
+            if (aiBadgeElement) {
+                aiBadgeElement.classList.add('hidden');
+            }
+            if (dateInput instanceof HTMLInputElement) {
+                dateInput.value = '';
+            }
+            if (timeInput instanceof HTMLInputElement) {
+                timeInput.value = '';
+            }
+
+            setSchedulePlatformState(platformCode);
+        }
+
+        function openScheduleModal(rowElement) {
+            const modal = document.getElementById('scheduleModal');
+            const backdrop = document.getElementById('scheduleModalBackdrop');
+            const panel = document.getElementById('scheduleModalPanel');
+
+            populateScheduleModal(rowElement || null);
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Trigger reflow
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeScheduleModal() {
+            const modal = document.getElementById('scheduleModal');
+            const backdrop = document.getElementById('scheduleModalBackdrop');
+            const panel = document.getElementById('scheduleModalPanel');
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            panel.classList.remove('scale-100', 'opacity-100');
+            panel.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- 自定义时间选择器切换 ---
+        function toggleCustomTime(value) {
+            const container = document.getElementById('custom-time-picker-container');
+            if (value === 'custom') {
+                container.classList.remove('hidden');
+                void container.offsetWidth;
+                container.classList.add('opacity-100');
+            } else {
+                container.classList.remove('opacity-100');
+                setTimeout(() => { container.classList.add('hidden'); }, 300);
+            }
+        }
+
+        const AUTH_STORAGE_KEY = 'ai-content-auth-session';
+        const API_BASE_URL = 'http://localhost:8000';
+
+        function getAuthToken() {
+            try {
+                const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+                if (!raw) return '';
+                const session = JSON.parse(raw);
+                return String(session?.accessToken || '').trim();
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function showDistributionToast(message, type = 'info') {
+            const toast = document.getElementById('distributionToast');
+            if (!toast) return;
+
+            const palette = {
+                success: 'flex border-emerald-200 bg-emerald-50 text-emerald-700',
+                error: 'flex border-red-200 bg-red-50 text-red-700',
+                info: 'flex border-blue-200 bg-blue-50 text-blue-700',
+            };
+
+            toast.className = `mx-5 mt-5 items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-sm ${palette[type] || palette.info}`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-[18px] mt-0.5">${type === 'error' ? 'error' : 'info'}</span>
+                <span>${message}</span>
+            `;
+
+            window.clearTimeout(window.__distributionToastTimer);
+            window.__distributionToastTimer = window.setTimeout(() => {
+                toast.className = 'mx-5 mt-5 hidden items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-sm';
+                toast.innerHTML = '';
+            }, 4200);
+        }
+
+        async function requestWithAuth(path, options = {}) {
+            const token = getAuthToken();
+            if (!token) {
+                throw new Error('登录状态已失效，请重新登录后再刷新抖音内容。');
+            }
+
+            const response = await fetch(`${API_BASE_URL}${path}`, {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...(options.headers || {}),
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined,
+            });
+
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload || typeof payload.code !== 'number' || payload.code < 200 || payload.code >= 300) {
+                const message = payload?.msg || payload?.detail || `请求失败 (${response.status})`;
+                throw new Error(message);
+            }
+
+            return payload.data;
+        }
+
+        async function resolveDouyinAccountId() {
+            const data = await requestWithAuth('/api/v1/platforms/accounts?platformCode=douyin');
+            const list = Array.isArray(data?.list) ? data.list : [];
+            if (!list.length) {
+                throw new Error('当前账号还没有绑定抖音平台账号。');
+            }
+
+            const activeAccount = list.find((item) => item?.authStatus === 'authorized' && (!item?.sessionStatus || item.sessionStatus === 'active'));
+            const fallbackAccount = activeAccount || list[0];
+            const accountId = Number(fallbackAccount?.accountId || 0);
+            if (!accountId) {
+                throw new Error('未找到可用的抖音账号。');
+            }
+            return accountId;
+        }
+
+        async function resolveDouyinAccounts() {
+            const data = await requestWithAuth('/api/v1/platforms/accounts?platformCode=douyin');
+            const list = Array.isArray(data?.list) ? data.list : [];
+            const activeAccounts = list
+                .filter((item) => item?.authStatus === 'authorized' && (!item?.sessionStatus || item.sessionStatus === 'active'))
+                .map((item) => ({
+                    accountId: Number(item?.accountId || 0),
+                    accountName: String(item?.nickname || item?.accountName || '').trim() || `账号${item?.accountId || ''}`,
+                }))
+                .filter((item) => item.accountId > 0);
+
+            if (!activeAccounts.length) {
+                throw new Error('未找到可用的抖音账号。');
+            }
+            return activeAccounts;
+        }
+
+        function setButtonLoadingState(button, isLoading, loadingText) {
+            if (!button) return;
+            button.disabled = isLoading;
+            button.dataset.originalText = button.dataset.originalText || button.textContent.trim();
+            button.textContent = isLoading ? loadingText : button.dataset.originalText;
+            button.classList.toggle('opacity-60', isLoading);
+            button.classList.toggle('cursor-not-allowed', isLoading);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatMetric(value) {
+            const numeric = Number(value || 0);
+            if (!Number.isFinite(numeric) || numeric <= 0) {
+                return '-';
+            }
+            if (numeric >= 10000) {
+                return `${(numeric / 10000).toFixed(1)}w`;
+            }
+            if (numeric >= 1000) {
+                return `${(numeric / 1000).toFixed(1)}k`;
+            }
+            return String(numeric);
+        }
+
+        function computeScore(item) {
+            const likes = Number(item?.liked_count || 0);
+            const comments = Number(item?.comment_count || 0);
+            const shares = Number(item?.share_count || 0);
+            const score = Math.min(99, Math.round(likes * 0.02 + comments * 0.08 + shares * 0.12));
+            return score > 0 ? score : null;
+        }
+
+        function resolvePlatformMeta(platformCode) {
+            const normalized = String(platformCode || '').trim().toLowerCase();
+            const map = {
+                douyin: { icon: 'music_note', color: 'text-slate-800', name: '抖音' },
+                xiaohongshu: { icon: 'auto_awesome', color: 'text-red-500', name: '小红书' },
+                bilibili: { icon: 'tv', color: 'text-blue-500', name: 'Bilibili' },
+                kuaishou: { icon: 'movie', color: 'text-orange-600', name: '快手' },
+            };
+            return map[normalized] || { icon: 'apps', color: 'text-text-secondary', name: normalized || '未知平台' };
+        }
+
+        function resolveStatusMeta(status) {
+            const normalized = String(status || '').trim().toLowerCase();
+            if (normalized === 'deleted') {
+                return {
+                    label: '已删除',
+                    className: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200',
+                    dotClass: 'w-1.5 h-1.5 rounded-full bg-slate-400',
+                };
+            }
+            if (normalized === 'pending') {
+                return {
+                    label: '待发布',
+                    className: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100',
+                    dotClass: 'w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse',
+                };
+            }
+            return {
+                label: '已发布',
+                className: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100',
+                dotClass: 'w-1.5 h-1.5 rounded-full bg-emerald-500',
+            };
+        }
+
+        function buildDistributionRow(item) {
+            const platform = resolvePlatformMeta(item.platform_code);
+            const status = resolveStatusMeta(item.status);
+            const score = computeScore(item);
+            const title = escapeHtml(item.title || item.content_id || '未命名内容');
+            const contentId = escapeHtml(item.content_id || '-');
+            const description = escapeHtml(item.description || '');
+            const coverUrl = escapeHtml(item.cover_url || 'https://picsum.photos/seed/distribution/200/100');
+            const metric = formatMetric(item.view_count);
+            const accountName = escapeHtml(item.account_name || '-');
+            const avatarUrl = escapeHtml(item.account_avatar_url || '');
+            const scopeApi = `window.__legacyScopes['distribution']`;
+            return `
+                <tr class="hover:bg-surface-secondary/50 transition-colors group cursor-pointer"
+                    data-account-name="${escapeHtml(item.account_name || '')}"
+                    data-platform-code="${escapeHtml(item.platform_code || '')}"
+                    data-platform-name="${escapeHtml(item.platform_name || '')}"
+                    data-title="${title}"
+                    data-content-id="${contentId}"
+                    data-description="${description}"
+                    data-view-count="${Number(item.view_count || 0)}"
+                    data-liked-count="${Number(item.liked_count || 0)}"
+                    data-comment-count="${Number(item.comment_count || 0)}"
+                    data-share-count="${Number(item.share_count || 0)}"
+                    data-score="${score || ''}"
+                    onclick="${scopeApi}.openContentDetailModal(this)">
+                    <td class="px-6 py-4 font-medium text-text-main">
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-20 bg-border rounded-lg overflow-hidden relative shadow-sm">
+                                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('${coverUrl}')"></div>
+                            </div>
+                            <div>
+                                <div class="truncate max-w-[180px] font-semibold group-hover:text-primary transition-colors">${title}</div>
+                                <div class="text-xs text-text-tertiary mt-0.5 font-mono">ID: ${contentId}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-1.5 font-medium">
+                                <span class="material-symbols-outlined text-[18px] ${platform.color}">${platform.icon}</span>
+                                ${escapeHtml(platform.name)}
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                ${avatarUrl ? `<img src="${avatarUrl}" alt="avatar" class="h-5 w-5 rounded-full object-cover border border-border shrink-0" />` : `<div class="h-5 w-5 rounded-full bg-surface-secondary border border-border flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[12px] text-text-tertiary">person</span></div>`}
+                                <div class="text-xs text-text-tertiary truncate max-w-[150px]">${accountName}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span data-row-status class="${status.className}">
+                            <span class="${status.dotClass}"></span> ${status.label}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right font-medium text-text-main">${metric}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="inline-flex w-8 h-8 rounded-full ${score ? 'bg-blue-50 border border-blue-200 text-blue-700' : 'bg-surface-secondary border border-border text-text-tertiary'} items-center justify-center text-xs font-bold">
+                            ${score || '-'}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="event.stopPropagation(); ${scopeApi}.openScheduleModal(this.closest('tr'))"
+                            class="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors">排期</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderDistributionItems(items) {
+            const tbody = document.getElementById('distributionTableBody');
+            if (!tbody) return;
+
+            const visibleItems = Array.isArray(items)
+                ? items.filter((item) => String(item?.status || '').trim().toLowerCase() !== 'deleted')
+                : [];
+
+            if (!visibleItems.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-text-secondary">暂无内容数据</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = visibleItems.map(buildDistributionRow).join('');
+        }
+
+        async function loadDistributionItems() {
+            const tbody = document.getElementById('distributionTableBody');
+            const keyword = document.getElementById('distributionKeywordInput')?.value?.trim() || '';
+            const platformCode = document.getElementById('distributionPlatformSelect')?.value || '';
+            const status = document.getElementById('distributionStatusSelect')?.value || '';
+
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-text-secondary">加载中...</td>
+                    </tr>
+                `;
+            }
+
+            try {
+                const params = new URLSearchParams();
+                if (keyword) params.set('keyword', keyword);
+                if (platformCode) params.set('platformCode', platformCode);
+                if (status) params.set('status', status);
+                const query = params.toString();
+                const result = await requestWithAuth(`/api/v1/distribution/items${query ? `?${query}` : ''}`, {
+                    method: 'GET',
+                });
+                renderDistributionItems(result?.list || []);
+            } catch (error) {
+                renderDistributionItems([]);
+                showDistributionToast(error?.message || '加载分发内容失败，请稍后重试。', 'error');
+            }
+        }
+
+        async function refreshDouyinProfile() {
+            const button = document.getElementById('distributionRefreshButton');
+            setButtonLoadingState(button, true, '刷新中...');
+
+            try {
+                const accountId = await resolveDouyinAccountId();
+                const result = await requestWithAuth(`/api/v1/platforms/accounts/${accountId}/sync-self-works`, {
+                    method: 'POST',
+                    body: { maxCount: 50 },
+                });
+
+                const syncedCount = Number(result?.syncedCount || 0);
+                const relationCount = Number(result?.relationCount || 0);
+                showDistributionToast(`抖音内容刷新完成，拉取 ${syncedCount} 条作品，新增绑定 ${relationCount} 条。`, 'success');
+                await loadDistributionItems();
+            } catch (error) {
+                showDistributionToast(error?.message || '刷新抖音内容失败，请稍后重试。', 'error');
+            } finally {
+                setButtonLoadingState(button, false, '刷新中...');
+            }
+        }
+
+        async function refreshDouyinProfiles() {
+            const button = document.getElementById('distributionRefreshButton');
+            setButtonLoadingState(button, true, '刷新中...');
+
+            try {
+                const accounts = await resolveDouyinAccounts();
+                const results = await Promise.all(
+                    accounts.map(async (account) => ({
+                        accountName: account.accountName,
+                        result: await requestWithAuth(`/api/v1/platforms/accounts/${account.accountId}/sync-self-works`, {
+                            method: 'POST',
+                            body: { maxCount: 50 },
+                        }),
+                    }))
+                );
+
+                const syncedCount = results.reduce((sum, item) => sum + Number(item.result?.syncedCount || 0), 0);
+                const relationCount = results.reduce((sum, item) => sum + Number(item.result?.relationCount || 0), 0);
+                showDistributionToast(`抖音内容刷新完成，同步 ${results.length} 个账号，拉取 ${syncedCount} 条作品，新增绑定 ${relationCount} 条。`, 'success');
+                await loadDistributionItems();
+            } catch (error) {
+                showDistributionToast(error?.message || '刷新抖音内容失败，请稍后重试。', 'error');
+            } finally {
+                setButtonLoadingState(button, false, '刷新抖音');
+            }
+        }
+
+        function toggleDistributionFilterPanel(forceOpen) {
+            const panel = document.getElementById('distributionFilterPanel');
+            if (!panel) return;
+
+            const nextVisible = typeof forceOpen === 'boolean' ? forceOpen : panel.classList.contains('hidden');
+            panel.classList.toggle('hidden', !nextVisible);
+        }
+
+        function initializeDistributionPage() {
+            document.getElementById('distributionRefreshButton')?.addEventListener('click', () => {
+                refreshDouyinProfiles();
+            });
+            document.getElementById('distributionQueryButton')?.addEventListener('click', () => {
+                toggleDistributionFilterPanel();
+            });
+            document.getElementById('distributionApplyFilterButton')?.addEventListener('click', () => {
+                loadDistributionItems();
+                toggleDistributionFilterPanel(false);
+            });
+            document.getElementById('distributionKeywordInput')?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    loadDistributionItems();
+                }
+            });
+            document.addEventListener('click', (event) => {
+                const panel = document.getElementById('distributionFilterPanel');
+                const trigger = document.getElementById('distributionQueryButton');
+                if (!panel || panel.classList.contains('hidden')) {
+                    return;
+                }
+                const target = event.target;
+                if (
+                    target instanceof Node
+                    && !panel.contains(target)
+                    && !trigger?.contains(target)
+                ) {
+                    toggleDistributionFilterPanel(false);
+                }
+            });
+            loadDistributionItems();
+        }
+
+        initializeDistributionPage();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563EB",
+                        "primary-hover": "#1D4ED8",
+                        "background": "#F8F9FA",
+                        "surface": "#FFFFFF",
+                        "surface-secondary": "#F1F5F9",
+                        "border": "#E2E8F0",
+                        "text-main": "#1E293B",
+                        "text-secondary": "#64748B",
+                        "text-tertiary": "#94A3B8",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <title>AI内容自动化 - 平台授权</title>
+    <style>
+        body {
+            font-family: "Noto Sans", sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: "Space Grotesk", sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-text-main min-h-screen overflow-hidden flex antialiased selection:bg-primary/20 selection:text-primary">
+    <div class="flex flex-1 min-h-screen w-full">
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <header
+                class="h-16 border-b border-border bg-surface/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-lg font-bold">平台授权中心</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="window.parent.postMessage('openAddPlatformModal', '*');"
+                        class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-primary-hover transition-colors shadow-sm shadow-primary/20">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                        新增平台授权
+                    </button>
+                </div>
+            </header>
+            <div class="p-8 w-full space-y-8">
+                <!-- Tabs -->
+                <div class="border-b border-border flex gap-8">
+                    <button class="pb-4 text-sm font-bold border-b-2 border-primary text-primary">平台列表</button>
+                    <button class="pb-4 text-sm font-medium text-text-secondary hover:text-text-main">授权历史</button>
+                    <button class="pb-4 text-sm font-medium text-text-secondary hover:text-text-main">安全审计</button>
+                </div>
+                <!-- Global Settings Section -->
+                <section class="bg-surface rounded-xl border border-border p-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="material-symbols-outlined text-primary">settings_suggest</span>
+                        <h3 class="text-base font-bold">全局发布设置</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex items-center justify-between p-4 bg-background rounded-lg">
+                            <div>
+                                <p class="text-sm font-bold">自动回复评论</p>
+                                <p class="text-xs text-text-secondary">使用AI自动回复粉丝留言</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input checked="" class="sr-only peer" type="checkbox" />
+                                <div
+                                    class="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-surface after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-background rounded-lg">
+                            <div>
+                                <p class="text-sm font-bold">智能去除水印</p>
+                                <p class="text-xs text-text-secondary">发布前自动清理视频水印</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input checked="" class="sr-only peer" type="checkbox" />
+                                <div
+                                    class="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-surface after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-background rounded-lg">
+                            <div>
+                                <p class="text-sm font-bold">自动标签优化</p>
+                                <p class="text-xs text-text-secondary">根据趋势自动匹配话题</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input class="sr-only peer" type="checkbox" />
+                                <div
+                                    class="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-surface after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+                <!-- Platform Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- TikTok Card -->
+                    <div class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-surface-secondary flex items-center justify-center rounded-full"
+                                    data-alt="TikTok brand logo colorful abstract icon">
+                                    <span class="material-symbols-outlined text-text-secondary">music_note</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-green-50 border border-green-200 text-green-600 text-[10px] font-bold rounded uppercase">已连接</span>
+                        </div>
+                        <h4 class="font-bold text-base">抖音 / TikTok</h4>
+                        <p class="text-sm text-text-secondary mb-6">账号: <span
+                                class="text-text-main font-medium">AI_Creator_Alpha</span></p>
+                        <button
+                            class="w-full py-2 bg-surface-secondary text-text-main hover:bg-border rounded-lg text-sm font-bold transition-colors">管理授权</button>
+                    </div>
+                    <!-- Xiaohongshu Card -->
+                    <div class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-red-100 flex items-center justify-center rounded-full"
+                                    data-alt="Xiaohongshu brand logo red abstract pattern">
+                                    <span class="material-symbols-outlined text-red-500">auto_awesome</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-surface-secondary border border-border text-text-secondary text-[10px] font-bold rounded uppercase">Not
+                                已连接</span>
+                        </div>
+                        <h4 class="font-bold text-base">小红书</h4>
+                        <p class="text-sm text-text-secondary mb-6">未绑定账号</p>
+                        <button
+                            class="w-full py-2 bg-primary text-white hover:bg-primary-hover shadow-sm shadow-primary/20 rounded-lg text-sm font-bold transition-colors">立即授权</button>
+                    </div>
+                    <!-- WeChat Video Card -->
+                    <div
+                        class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow border-red-200">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-green-100 flex items-center justify-center rounded-full"
+                                    data-alt="WeChat Video logo green minimalist icon">
+                                    <span class="material-symbols-outlined text-green-600">videocam</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold rounded uppercase">已过期</span>
+                        </div>
+                        <h4 class="font-bold text-base">视频号</h4>
+                        <p class="text-sm text-text-secondary mb-6">账号: <span
+                                class="text-text-main font-medium">TechTrends_CN</span></p>
+                        <button
+                            class="w-full py-2 bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 rounded-lg text-sm font-bold transition-colors">重新授权</button>
+                    </div>
+                    <!-- Bilibili Card -->
+                    <div class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-blue-100 flex items-center justify-center rounded-full"
+                                    data-alt="Bilibili brand logo blue anime style icon">
+                                    <span class="material-symbols-outlined text-blue-500">tv</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-green-50 border border-green-200 text-green-600 text-[10px] font-bold rounded uppercase">已连接</span>
+                        </div>
+                        <h4 class="font-bold text-base">B站</h4>
+                        <p class="text-sm text-text-secondary mb-6">账号: <span
+                                class="text-text-main font-medium">Bili_Official_AI</span></p>
+                        <button
+                            class="w-full py-2 bg-surface-secondary text-text-main hover:bg-border rounded-lg text-sm font-bold transition-colors">管理授权</button>
+                    </div>
+                    <!-- Instagram Card -->
+                    <div class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-purple-100 flex items-center justify-center rounded-full"
+                                    data-alt="Instagram brand logo gradient vibrant icon">
+                                    <span class="material-symbols-outlined text-purple-600">photo_camera</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-surface-secondary border border-border text-text-secondary text-[10px] font-bold rounded uppercase">Not
+                                已连接</span>
+                        </div>
+                        <h4 class="font-bold text-base">Instagram</h4>
+                        <p class="text-sm text-text-secondary mb-6">未绑定账号</p>
+                        <button
+                            class="w-full py-2 bg-primary text-white hover:bg-primary-hover shadow-sm shadow-primary/20 rounded-lg text-sm font-bold transition-colors">立即授权</button>
+                    </div>
+                    <!-- YouTube Card -->
+                    <div class="bg-surface border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-surface-secondary flex items-center justify-center overflow-hidden">
+                                <div class="w-10 h-10 bg-red-100 flex items-center justify-center rounded-full"
+                                    data-alt="YouTube brand logo red minimalist icon">
+                                    <span class="material-symbols-outlined text-red-600">play_circle</span>
+                                </div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-green-50 border border-green-200 text-green-600 text-[10px] font-bold rounded uppercase">已连接</span>
+                        </div>
+                        <h4 class="font-bold text-base">YouTube</h4>
+                        <p class="text-sm text-text-secondary mb-6">账号: <span
+                                class="text-text-main font-medium">Channel_Alpha_TV</span></p>
+                        <button
+                            class="w-full py-2 bg-surface-secondary text-text-main hover:bg-border rounded-lg text-sm font-bold transition-colors">管理授权</button>
+                    </div>
+                </div>
+                <!-- Info Banner -->
+                <div class="flex items-start gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                    <span class="material-symbols-outlined text-primary mt-1">info</span>
+                    <div>
+                        <p class="text-sm font-bold text-text-main">关于平台授权安全</p>
+                        <p class="text-xs text-text-secondary mt-1">
+                            我们使用标准的 OAuth 2.0 协议进行授权，绝不会访问或存储您的账号密码。授权过期通常为 30-90 天，请留意系统通知以便及时刷新。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
