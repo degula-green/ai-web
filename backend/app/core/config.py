@@ -353,7 +353,7 @@ def get_settings() -> Settings:
             smtp_host="smtp.qq.com",
             smtp_port=465, # QQ 邮箱 SSL 端口
             smtp_username="1361788424@qq.com",
-            smtp_password="REDACTED_EMAIL_SMTP_PASSWORD", # 用户提供的 QQ 授权码
+            smtp_password=_get_env("EMAIL_SMTP_PASSWORD", "").strip(), # QQ 邮箱授权码，通过环境变量注入
             smtp_use_tls=False,
             smtp_use_ssl=True,
         ),
